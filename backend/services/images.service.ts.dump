@@ -1,0 +1,26 @@
+import { images } from '@prisma/client';
+import prisma from '../prisma/db';
+
+export interface ImageModel {
+  id?: number,
+  filename?: string,
+  url?: string,
+  uploaded_by?: number,
+  uploaded_at?: Date,
+  deleted_at?: Date | null
+};
+export function storeImageURL(properties: ImageModel[]): Promise<any> {
+  return new Promise<any>((resolve, reject) => {
+    const data: any = Array.from(properties);
+    prisma.images.createMany({
+      data: data,
+      skipDuplicates: true
+    })
+    .then(res => resolve(res))
+    .catch(err => reject(err));
+  });
+};
+
+export default {
+  storeImageURL
+}

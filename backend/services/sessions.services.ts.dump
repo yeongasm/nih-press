@@ -1,0 +1,58 @@
+import { user_sessions } from "@prisma/client";
+import prisma from '../prisma/db';
+
+export interface UserSessionModel {
+  id?: number,
+  user_account_id?: number,
+  session_token?: string,
+  logged_in_at?: Date,
+  logged_out_at?: Date | null
+};
+
+export interface CreateSessionModel {
+  user_account_id: number,
+  session_token: string,
+  expires_at: Date
+};
+
+export function getSessionWith(properties: UserSessionModel): Promise<user_sessions[]> {
+  return new Promise<user_sessions[]>((resolve, reject) => {
+    prisma.user_sessions.findMany({
+      where: properties
+    })
+    .then(res => resolve(res))
+    .catch(err => reject(err));
+  });
+};
+
+export function newSession(properties: CreateSessionModel): Promise<user_sessions> {
+  return new Promise<user_sessions>((resolve, reject) => {
+    prisma.user_sessions.create({
+      data: properties
+    })
+    .then(res => resolve(res))
+    .catch(err => reject(err));
+  });
+};
+
+export function logOutFromSession(token: string) {
+  return new Promise((resolve, reject) => {
+    prisma.user_sessions.updateMany({
+      data: {
+        logged_out_at: new Date()
+      },
+      where: {
+        session_token: token,
+        logged_out_at: null
+      }
+    })
+    .then(res => resolve(res))
+    .catch(err => reject(err));
+  });
+};
+
+export default {
+  getSessionWith,
+  newSession,
+  logOutFromSession
+}

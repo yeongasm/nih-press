@@ -1,0 +1,38 @@
+import http, { validateRequestSchema, } from './api.impl';
+import { isUserAuthenticated } from '../auth/auth.impl';
+import groupSchema from '../schema/group.schema';
+import * as groupController from '../controllers/groups.controller';
+
+http.post(
+  "group",
+  isUserAuthenticated,
+  validateRequestSchema(groupSchema.newGroup),
+  groupController.groupExists({ param: "name", throwOnExist: true }),
+  groupController.createGroup
+);
+
+http.get(
+  "groups",
+  isUserAuthenticated,
+  groupController.getAllGroupsForUser
+);
+
+// http.get(
+//   "group/:id",
+//   isUserAuthenticated,
+//   groupController.getGroupWithId
+// );
+
+http.patch(
+  "group/:id",
+  isUserAuthenticated,
+  validateRequestSchema(groupSchema.editGroup),
+  groupController.groupExists({ param: "name", throwOnExist: true }),
+  groupController.editGroup
+);
+
+http.delete(
+  "group/:id",
+  isUserAuthenticated,
+  groupController.removeGroupWithId
+);
