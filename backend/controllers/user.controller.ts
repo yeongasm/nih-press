@@ -14,6 +14,9 @@ export function emailExist(throwOnExist: boolean = false): Function {
         if (throwOnExist && userAccount)
           return next(API.conflict("EMAIL_EXIST"))
 
+        if (!throwOnExist && !userAccount)
+          return next(API.unprocessableEntity("EMAIL_NON_EXISTENT"));
+
         // attach to request body so that we don't have to query the db in the next middleware.
         req.body.user_account = userAccount;
         next();
@@ -89,7 +92,7 @@ export function successfulLogin(req: Request, res: Response, next: NextFunction)
 };
 
 export function uploadProfileRelatedFiles(req: any, res: Response, next: NextFunction): void {
-  const option: FileUploadOption = { dstPath: `${req._passport.user.id}\\${req.body.bucket}` };
+  const option: FileUploadOption = { dstPath: `${process.env.NODE_ENV}/${req._passport.user.id}/${req.body.bucket}` };
   const uploads: FileUploadInfo[] = [];
 
   for (const file of req.files) {

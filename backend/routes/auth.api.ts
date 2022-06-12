@@ -5,30 +5,31 @@ import authSchema from '../schema/auth.schema';
 import { isUserAuthenticated } from '../auth/auth.impl';
 
 http.post(
-  "auth/login",
+  "login",
   validateRequestSchema(authSchema.login),
   userControoler.emailExist(),
   authController.passwordValid,
-  authController.login,
-  authController.requestJwt
+  authController.login
+  // authController.requestJwt
 );
 
 http.post(
-  "auth/refresh_token",
-  isUserAuthenticated, // Can only refresh the access token if user was previously authenticated.
-  authController.requestJwt
-);
-
-http.post(
-  "auth/logout",
-  isUserAuthenticated,
+  "logout",
+  // isUserAuthenticated, // Don't have to check if the user has access for logout.
   authController.logout
 );
 
-if (process.env.NODE_ENV == "development") {
-  http.get(
-    "auth/test",
-    isUserAuthenticated,
-    authController.testJwt
-  );
-};
+// NOTE:
+// Ideally, we should do isUserAuthenticated here but because storing JWT in client localstorage is bad practice,
+// We're just going to check if the session is valid and issue them with a new JWT.
+http.post(
+  "refresh_access",
+  authController.isSessionStillValid,
+  authController.requestJwt
+);
+
+http.get(
+  "check_access",
+  isUserAuthenticated,
+  authController.validateJwt
+);

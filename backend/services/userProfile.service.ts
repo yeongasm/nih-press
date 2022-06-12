@@ -74,9 +74,33 @@ export function getUserProfile(userAccountID: number): Promise<any> {
   });
 };
 
+export function getUserProfilePublic(email: string): Promise<any> {
+  return new Promise<any>((resolve, reject) => {
+    prisma.user_accounts.findMany({
+      select: {
+        username: true,
+        email: true,
+        user_profile: {
+          select: {
+            display_name: true,
+            location: true,
+            profile_img_url: true,
+            profile_banner_url: true,
+            resume_url: true
+          }
+        }
+      },
+      where: { email: email }
+    })
+    .then(userProfiles => resolve(userProfiles))
+    .catch(err => reject(err));
+  });
+};
+
 export default {
   createOne,
   update,
   get,
-  getUserProfile
+  getUserProfile,
+  getUserProfilePublic
 };

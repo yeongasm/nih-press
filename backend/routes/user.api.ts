@@ -26,8 +26,8 @@ if (process.env.NODE_ENV == "development") {
 
 }
 
-http.post(
-  "user/profile",
+http.patch(
+  "user_profile",
   isUserAuthenticated,
   validateRequestSchema(userSchema.updateProfile),
   userProfileController.updateUserProfile,
@@ -35,10 +35,15 @@ http.post(
 );
 
 http.get(
-  "user/profile",
+  "user_profile",
   isUserAuthenticated,
   userProfileController.getUserProfile
-)
+);
+
+http.get(
+  "public_user_profile",
+  userProfileController.getPublicAccessUserProfile
+);
 
 // Perhaps we can combine all three APIs into one.
 
@@ -47,7 +52,7 @@ http.post(
   isUserAuthenticated,
   validateRequestSchema(userSchema.uploadDocument),
   storeFile.array("file", 1),
-  onlyAllowFilesWithExtension([ 'jpg', 'jpeg', 'png', 'html' ]),
+  onlyAllowFilesWithExtension([ 'jpg', 'jpeg', 'png', 'html', 'pdf' ]),
   userController.uploadProfileRelatedFiles
 );
 

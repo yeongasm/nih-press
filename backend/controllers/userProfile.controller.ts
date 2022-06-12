@@ -1,6 +1,7 @@
-import { Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { API } from './../routes/api.impl';
 import userProfileService, { type UserProfileModel } from '../services/userProfile.service';
+import userAccountService from '../services/users.services';
 
 export function updateUserProfile(req: any, res: Response, next: NextFunction): void {
   let params: UserProfileModel = {
@@ -37,4 +38,17 @@ export function getUserProfile(req: any, res: Response, next: NextFunction): voi
       res.status(result.statusCode()).json(result);
     })
     .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:GET_USER_PROFILE")));
+};
+
+export function getPublicAccessUserProfile(req: Request, res: Response, next: NextFunction): void {
+  userProfileService.getUserProfilePublic(req.query.email as string)
+  .then(userProfile => {
+    if (!userProfile || !userProfile.length)
+      return next(API.badRequest("USER_PROFILE_NON_EXISTENT"));
+
+    const result = API.ok("GET_PUBLIC_USER_PROFILE_OK");
+    result.attach(userProfile.shift());
+    res.status(result.statusCode()).json(result);
+  })
+  .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:GET_USER_PROFILE_PUB")));
 };

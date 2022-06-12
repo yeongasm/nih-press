@@ -46,13 +46,29 @@ export function update(req: any, res: Response, next: NextFunction): void {
     type: req.body?.type,
   };
   req.body.__groups__ && (category.group_id = req.body.__groups__.id);
-  categoryService.updateOne(category, req._passport.user.id)
+  categoryService.updateOne(category, parseInt(req.params.id))
   .then(category => {
     const result = API.ok("UPDATE_CATEGORY_OK");
     result.attach(category);
     res.status(result.statusCode()).json(result);
   })
   .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:UPDATE_CATEGORY_ERROR")));
+};
+
+export function getCategoriesForUser(req: any, res: Response, next: NextFunction): void {
+  // NOTE:
+  // req.body.user_account.id is set by the previous middleware
+  const categorySearchParam : CategoryModel = {
+    created_by: req._passport.user.id || req.body.user_account.id,
+    deleted_at: null
+  };
+  categoryService.getCategory(categorySearchParam)
+  .then(categories => {
+    const result = API.ok("Success!");
+    result.attach(categories);
+    res.status(result.statusCode()).json(result);
+  })
+  .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:GET_FAILED:CATEGORIES")));
 };
 
 export function remove(req: any, res: Response, next: NextFunction): void {

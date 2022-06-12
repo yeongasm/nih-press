@@ -28,10 +28,25 @@ export interface UpdateCategoryModel {
   group_id?: number
 };
 
-export function getCategory(properties: CategoryModel): Promise<categories[]> {
-  return new Promise<categories[]>((resolve, reject) => {
+export function getCategory(properties: CategoryModel): Promise<any> {
+  return new Promise<any>((resolve, reject) => {
     const whereClause: any = properties;
     prisma.categories.findMany({
+      select: {
+        id: true,
+        key: true,
+        value: true,
+        type: true,
+        created_by: true,
+        created_at: true,
+        edited_at: true,
+        group: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
       where: whereClause
     })
     .then(res => resolve(res))
@@ -42,6 +57,21 @@ export function getCategory(properties: CategoryModel): Promise<categories[]> {
 export function createOne(properties: CreateCategoryModel): Promise<any> {
   return new Promise<any>((resolve, reject) => {
     prisma.categories.create({
+      select: {
+        id: true,
+        key: true,
+        value: true,
+        type: true,
+        created_by: true,
+        created_at: true,
+        edited_at: true,
+        group: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
       data: properties,
     })
     .then(res => resolve(res))
@@ -52,6 +82,21 @@ export function createOne(properties: CreateCategoryModel): Promise<any> {
 export function updateOne(properties: UpdateCategoryModel, categoryID: number): Promise<any> {
   return new Promise<any>((resolve, reject) => {
     prisma.categories.update({
+      select: {
+        id: true,
+        key: true,
+        value: true,
+        type: true,
+        created_by: true,
+        created_at: true,
+        edited_at: true,
+        group: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
       data: { ...properties, edited_at: new Date() },
       where: { id: categoryID }
     })

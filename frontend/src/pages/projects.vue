@@ -1,11 +1,13 @@
 <template>
+  <SectionBody>
     Projects
+  </SectionBody>
 </template>
 
 <route>
 {
-    meta: {
-        layout: "default"
-    }
+  meta: {
+    layout: "default"
+  }
 }
 </route>

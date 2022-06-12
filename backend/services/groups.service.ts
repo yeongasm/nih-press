@@ -18,10 +18,10 @@ export interface CreateGroupModel {
 export function getGroups(where: GroupModel, select: string[] = []): Promise<any> {
   return new Promise<any>((resolve, reject) => {
     const whereClause: any = where;
-    let selectClause: any = undefined;
+    let selectClause: any = {};
     select.length && select.forEach(param => selectClause[param] = true);
     prisma.groups.findMany({
-      select: selectClause,
+      ...(select.length && { select: selectClause }),
       where: whereClause
     })
     .then(res => resolve(res))

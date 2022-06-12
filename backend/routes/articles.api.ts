@@ -5,38 +5,43 @@ import { isUserAuthenticated } from '../auth/auth.impl';
 import { storeFile, onlyAllowFilesWithExtension } from '../util/files';
 
 
-http.post(
-  "article",
-  isUserAuthenticated,
-  validateRequestSchema(articleSchema.createArticle),
-  articlesController.articleTitleExist(true),
-  storeFile.array("file", 1),
-  onlyAllowFilesWithExtension([ 'article' ]),
-  articlesController.uploadArticle(true),
-  articlesController.create
-);
+// http.post(
+//   "article",
+//   isUserAuthenticated,
+//   validateRequestSchema(articleSchema.createArticle),
+//   articlesController.articleTitleExist(true),
+//   storeFile.array("file", 1),
+//   onlyAllowFilesWithExtension([ 'article' ]),
+//   articlesController.uploadArticle(true),
+//   articlesController.create
+// );
 
-http.patch(
-  "article/:id",
-  isUserAuthenticated,
-  validateRequestSchema(articleSchema.updateArticle),
-  articlesController.articleTitleExist(true),
-  articlesController.deleteArticleFromStorage,
-  storeFile.array("file", 1),
-  onlyAllowFilesWithExtension([ 'article' ]),
-  articlesController.uploadArticle,
-  articlesController.update
-);
+// http.patch(
+//   "article/:id",
+//   isUserAuthenticated,
+//   validateRequestSchema(articleSchema.updateArticle),
+//   articlesController.articleTitleExist(true),
+//   articlesController.deleteArticleFromStorage,
+//   storeFile.array("file", 1),
+//   onlyAllowFilesWithExtension([ 'article' ]),
+//   articlesController.uploadArticle,
+//   articlesController.update
+// );
 
-http.get(
-  "article/:id",
-  articlesController.getArticleWithID
-);
+// NOTE:
+// This route is wrong and serves no purpose.
+// http.get(
+//   "article/:id",
+//   articlesController.getArticleWithID
+// );
 
-http.get(
-  "articles/:user_id",
-  articlesController.getArticleWithUserID
-);
+// NOTE:
+// This route is also wrong.
+// Needs rework.
+// http.get(
+//   "articles/:user_id",
+//   articlesController.getArticleWithUserID
+// );
 
 http.delete(
   "article/:id",

@@ -2,6 +2,7 @@ import http, { validateRequestSchema, } from './api.impl';
 import { isUserAuthenticated } from '../auth/auth.impl';
 import groupSchema from '../schema/group.schema';
 import * as groupController from '../controllers/groups.controller';
+import * as userController from '../controllers/user.controller';
 
 http.post(
   "group",
@@ -16,6 +17,12 @@ http.get(
   isUserAuthenticated,
   groupController.getAllGroupsForUser
 );
+
+http.get(
+  "public_groups",
+  userController.emailExist(),
+  groupController.getAllGroupsForUser
+)
 
 // http.get(
 //   "group/:id",

@@ -11,11 +11,12 @@ export function groupExists({ param, throwOnExist = false }: { param: string, th
   return (req: any, res: Response, next: NextFunction): void => {
     const searchClause: GroupModel = {
       name: req.body[param],
-      created_by: req._passport.user.id
+      created_by: req._passport.user.id,
+      deleted_at: null
     };
     groupsService.getGroups(searchClause)
     .then(groups => {
-      if (throwOnExist && groups)
+      if (throwOnExist && groups.length)
         next(API.conflict("GROUP_EXIST"));
       // attach to request body so that we don't have to query the db in the next middleware.
       if (groups && groups.length)
@@ -41,8 +42,10 @@ export function createGroup(req: any, res: Response, next: NextFunction): void {
 };
 
 export function getAllGroupsForUser(req: any, res: Response, next: NextFunction): void {
+  // NOTE:
+  // req.body.user_account.id is set by the previous middleware
   const groupSearchParams: GroupModel = {
-    created_by: req._passport.user.id,
+    created_by: req._passport.user.id || req.body.user_account.id,
     deleted_at: null
   };
   groupsService.getGroups(groupSearchParams, [ 'id', 'name', 'created_by', 'created_at', 'edited_at' ])
@@ -69,7 +72,7 @@ export function getAllGroupsForUser(req: any, res: Response, next: NextFunction)
 // };
 
 export function editGroup(req: any, res: Response, next: NextFunction): void {
-  groupsService.updateGroupName(req.body.name, req.params.id)
+  groupsService.updateGroupName(req.body.name, parseInt(req.params.id))
   .then(group => {
     const result = API.ok("Success!");
     result.attach(group);
@@ -79,10 +82,10 @@ export function editGroup(req: any, res: Response, next: NextFunction): void {
 };
 
 export function removeGroupWithId(req: any, res: Response, next: NextFunction): void {
-  groupsService.deleteGroup(req.params.id)
+  groupsService.deleteGroup(parseInt(req.params.id))
   .then(() => {
     const result = API.ok("Success!");
     res.status(result.statusCode()).json(result);
   })
-  .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:CREATE_FAILED:GROUP")));
+  .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:DELETE_FAILED:GROUP")));
 };

@@ -17,11 +17,13 @@ model user_accounts {
   password String
   created_at DateTime @default(now())
 
+  written articles[] @relation("ArticleWrittenBy")
+  edited articles[] @relation("ArticleEditedBy")
+  deleted articles[] @relation("ArticleDeletedBy")
+
+  projects projects[]
   categories categories[]
-  // resume_revisions resume_revision[]
-  // sessions user_sessions[]
-  // images images[]
-  user_profiles user_profile[]
+  user_profile user_profile?
   groups groups[]
 }
 
@@ -32,28 +34,10 @@ model user_profile {
   display_name String? @db.VarChar(255)
   location String? @db.VarChar(255)
 
-  written articles[] @relation("ArticleWrittenBy")
-  edited articles[] @relation("ArticleEditedBy")
-  deleted articles[] @relation("ArticleDeletedBy")
-
-  // profile_image images? @relation("ProfilePictureImg", fields: [profile_img_id], references: [id])
   profile_img_url String? @db.VarChar(255)
-  // profile_banner images? @relation("ProfileBannerImg", fields: [profile_banner_id], references: [id])
   profile_banner_url String? @db.VarChar(255)
   resume_url String? @db.VarChar(255)
 }
-
-// model user_sessions {
-//   id Int @id @default(autoincrement())
-//   user_account user_accounts @relation(fields: [user_account_id], references: [id])
-//   user_account_id Int
-//   session_token String
-//   expires_at DateTime
-//   logged_in_at DateTime @default(now())
-//   logged_out_at DateTime?
-
-//   @@index([user_account_id, session_token])
-// }
 
 model articles {
   id Int @id @default(autoincrement())
@@ -63,54 +47,39 @@ model articles {
   category categories? @relation(fields: [category_id], references: [id])
   category_id Int?
   created_at DateTime @default(now())
-  author user_profile @relation("ArticleWrittenBy", fields: [created_by], references: [id])
+  author user_accounts @relation("ArticleWrittenBy", fields: [created_by], references: [id])
   created_by Int
   edited_at DateTime @default(now())
-  editor user_profile @relation("ArticleEditedBy", fields: [edited_by], references: [id])
+  editor user_accounts @relation("ArticleEditedBy", fields: [edited_by], references: [id])
   edited_by Int
   deleted_at DateTime?
-  deleter user_profile? @relation("ArticleDeletedBy", fields: [deleted_by], references: [id])
+  deleter user_accounts? @relation("ArticleDeletedBy", fields: [deleted_by], references: [id])
   deleted_by Int?
 
 
   @@index([title, created_at])
 }
 
-// model resume_revision {
-//   id Int @id @default(autoincrement())
-//   user_account user_accounts @relation(fields: [created_by], references: [id])
-//   created_by Int
-//   created_at DateTime @default(now())
-//   edited_at DateTime @default(now())
-//   deleted_at DateTime?
+enum ProjectRepoType {
+  github
+  gitlab
+  bitbucket
+}
 
-//   cv resume?
-// }
+model projects {
+  id Int @id @default(autoincrement())
+  title String @db.VarChar(255)
+  description String? @db.VarChar(255)
+  content_url String @db.VarChar(255)
+  repo_url String? @db.VarChar(255)
+  repo_type ProjectRepoType @default(github)
+  category categories? @relation(fields: [category_id], references: [id])
+  category_id Int?
+  owner user_accounts @relation(fields: [owned_by], references: [id])
+  owned_by Int
 
-// model resume {
-//   id Int @id @default(autoincrement())
-//   cv_history resume_revision @relation(fields: [cv_history_id], references: [id])
-//   cv_history_id Int
-
-//   name String @db.VarChar(255)
-//   email String @db.VarChar(255)
-//   phone_number String @db.VarChar(255)
-
-//   information resume_info[]
-// }
-
-// model resume_info {
-//   id Int @id @default(autoincrement())
-//   resume resume @relation(fields: [resume_id], references: [id])
-//   resume_id Int
-//   category categories @relation(fields: [category_id], references: [id])
-//   category_id Int
-//   title String @db.VarChar(255)
-//   description String @db.VarChar(255)
-//   content String
-
-//   @@index([title])
-// }
+  @@index([title])
+}
 
 enum CategoryValType {
   bool
@@ -135,6 +104,7 @@ model categories {
   // images images[]
   // resume_info resume_info[]
   articles articles[]
+  projects projects[]
 
   @@index([key])
 }

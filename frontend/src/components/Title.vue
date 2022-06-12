@@ -1,5 +1,5 @@
 <template>
-    <span text-2xl font-bold color-gray-500>
-        <slot></slot>
-    </span>
+  <div text-2xl font-bold text-gray-700>
+    <slot></slot>
+  </div>
 </template>
