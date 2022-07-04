@@ -104,6 +104,31 @@ function validateRequestSchema(schema: ObjectSchema) {
       allowUnknown: false,
       stripUnknown: true
     };
+
+    for (const key in req.body) {
+      const value = req.body[key];
+
+      if (typeof value === 'string') {
+        // Convert to array.
+        if (value.startsWith("[") && value.endsWith("]")) {
+          req.body[key] = JSON.parse(req.body[key]);
+          continue;
+        }
+
+        // Convert to boolean.
+        if (value == 'true' || value == 'false') {
+          req.body[key] = (value === 'true');
+          continue;
+        }
+
+        if (isNaN(req.body[key]))
+          continue;
+
+        // Convert to number.
+        req.body[key] = parseInt(req.body[key]);
+      }
+    }
+
     const validation = schema.validate(req.body, options);
     if (validation.error) {
       return next(API.unprocessableEntity(validation.error.details[0].message));

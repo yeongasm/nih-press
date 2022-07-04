@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
 import { setupLayouts } from 'virtual:generated-layouts'
+import 'vue-select/dist/vue-select.css';
 import vSelect from 'vue-select';
 import pages from '~pages'
 import App from './App.vue'
@@ -30,4 +31,8 @@ router.beforeEach(async (to, from) => {
   }
 });
 
-createApp(App).component('v-select', vSelect).use(createPinia()).use(router).mount('#app')
+createApp(App)
+  .component('v-select', vSelect)
+  .use(createPinia())
+  .use(router)
+  .mount('#app')

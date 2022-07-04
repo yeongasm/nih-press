@@ -44,15 +44,15 @@ export function update(properties: UpdateUserProfileModel, userProfileID: number
   });
 };
 
-export function get(properties: UserProfileModel): Promise<user_profile[]> {
-  return new Promise<user_profile[]>((resolve, reject) => {
-    prisma.user_profile.findMany({
-      where: properties
-    })
-    .then(res => resolve(res))
-    .catch(err => reject(err));
-  });
-};
+// export function get(properties: UserProfileModel): Promise<user_profile[]> {
+//   return new Promise<user_profile[]>((resolve, reject) => {
+//     prisma.user_profile.findMany({
+//       where: properties
+//     })
+//     .then(res => resolve(res))
+//     .catch(err => reject(err));
+//   });
+// };
 
 export function getUserProfile(userAccountID: number): Promise<any> {
   return new Promise<any>((resolve, reject) => {
@@ -63,6 +63,7 @@ export function getUserProfile(userAccountID: number): Promise<any> {
       include: {
         user_account: {
           select: {
+            id: true,
             username: true,
             email: true
           }
@@ -100,7 +101,7 @@ export function getUserProfilePublic(email: string): Promise<any> {
 export default {
   createOne,
   update,
-  get,
+  // get,
   getUserProfile,
   getUserProfilePublic
 };

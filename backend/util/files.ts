@@ -53,12 +53,18 @@ export interface FileUploadInfo {
   option?: FileUploadOption
 };
 
-function getFileExtension(file: any): string {
+export interface FileUploadRawInfo {
+  content: string,
+  filename: string,
+  dstPath: string
+};
+
+export function getFileExtension(file: any): string {
   const nameSections: string[] = file.originalname.split(".");
   return nameSections[nameSections.length - 1].toLowerCase();
 };
 
-function processImageFile(
+export function processImageFile(
   file: any,
   resize: boolean = false,
   dimension: ImgResizeDim = { width: 1000, height: 1000 },
@@ -91,8 +97,8 @@ function processImageFile(
     }
 
     sharpInstance.toBuffer()
-      .then(data => resolve(data))
-      .catch(err => reject(err));
+    .then(data => resolve(data))
+    .catch(err => reject(err));
   });
 };
 
@@ -132,17 +138,27 @@ export function upload(uploadInfo: FileUploadInfo[]): Promise<UploadedFiles> {
   });
 };
 
-export function remove(url: string): Promise<boolean> {
-  return new Promise<boolean>(() => {
-    const sections: string[] = url.split("/");
-    const dstPath = sections[sections.length - 1];
-    return firebase.deleteBlob(dstPath);
+export function uploadRaw(uploadInfo: FileUploadRawInfo[]): Promise<UploadedFiles> {
+  return new Promise((resolve, reject) => {
+    let uploadedFiles: UploadedFiles = [];
+    for (const _upload of uploadInfo) {
+      firebase.uploadBlob(_upload.dstPath, Buffer.from(_upload.content, 'utf8'))
+      .then(url => {
+        uploadedFiles.push({ filename: _upload.filename, url: url });
+        (uploadedFiles.length == uploadInfo.length) && resolve(uploadedFiles);
+      })
+      .catch(err => reject(err))
+    }
   });
+};
+
+export function remove(path: string): Promise<boolean> {
+  return firebase.deleteBlob(path);
 };
 
 export function onlyAllowFilesWithExtension(extensions: string[]) {
   return (req: any, res: Response, next: NextFunction) => {
-    if (Object.entries(req.files).length) {
+    if (req.files != undefined && Object.entries(req.files).length) {
       // flatten object into array.
       if (!Array.isArray(req.files))
         req.files = Array.from(Object.entries(req.files), ([k, v]) => v).flat();
@@ -168,8 +184,11 @@ export function onlyAllowFilesWithExtension(extensions: string[]) {
 
 export default {
   storeFile,
+  processImageFile,
+  getFileExtension,
   deleteFiles,
   upload,
+  uploadRaw,
   remove,
   onlyAllowFilesWithExtension
 };

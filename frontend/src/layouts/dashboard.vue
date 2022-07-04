@@ -17,3 +17,16 @@
 <script setup lang="ts">
 import UpdateUserProfile from '@/components/UpdateUserProfile.vue';
 </script>
+
+<style>
+.ql-toolbar {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+.ql-container {
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  max-height: 500px;
+  overflow-y: auto;
+}
+</style>

@@ -8,7 +8,7 @@ import { upload, type FileUploadOption, type FileUploadInfo } from '../util/file
 
 export function emailExist(throwOnExist: boolean = false): Function {
   return (req: Request, res: Response, next: NextFunction): void => {
-    const param: UserAccountModel = { email: req.body.email };
+    const param: UserAccountModel = { email: req.body.email || req.query.email };
     userAccountService.getUserWith(param)
       .then((userAccount) => {
         if (throwOnExist && userAccount)
@@ -92,7 +92,7 @@ export function successfulLogin(req: Request, res: Response, next: NextFunction)
 };
 
 export function uploadProfileRelatedFiles(req: any, res: Response, next: NextFunction): void {
-  const option: FileUploadOption = { dstPath: `${process.env.NODE_ENV}/${req._passport.user.id}/${req.body.bucket}` };
+  const option: FileUploadOption = { dstPath: `${process.env.NODE_ENV}/user_account_id_${req._passport.user_profile.user_account.id}/${req.body.bucket}` };
   const uploads: FileUploadInfo[] = [];
 
   for (const file of req.files) {
@@ -121,7 +121,7 @@ export function uploadProfileRelatedFiles(req: any, res: Response, next: NextFun
 //     imagesToUpload.push({
 //       filename: file.filename,
 //       url: file.url,
-//       uploaded_by: req._passport.user.id,
+//       uploaded_by: req._passport.user_profile.user_account.id,
 //       deleted_at: null
 //     });
 //   }

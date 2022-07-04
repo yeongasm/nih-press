@@ -11,7 +11,7 @@ export function updateUserProfile(req: any, res: Response, next: NextFunction): 
     profile_banner_url: req.body.profile_banner_url,
     resume_url: req.body.resume_url
   };
-  userProfileService.get({ user_account_id: req._passport.user.id })
+  userProfileService.getUserProfile(parseInt(req._passport.user_profile.user_account.id))
     .then(userProfiles => {
       const profile = userProfiles.shift();
       // Technically, this shouldn't happen since user profiles are created when user accounts are created.
@@ -26,7 +26,7 @@ export function updateUserProfile(req: any, res: Response, next: NextFunction): 
 };
 
 export function getUserProfile(req: any, res: Response, next: NextFunction): void {
-  userProfileService.getUserProfile(req._passport.user.id)
+  userProfileService.getUserProfile(req._passport.user_profile.user_account.id)
     .then(userProfile => {
       if (!userProfile)
         return next(API.badRequest("USER_PROFILE_NON_EXISTENT"));

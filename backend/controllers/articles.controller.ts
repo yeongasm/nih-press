@@ -1,148 +1,196 @@
 import { Response, NextFunction } from 'express';
 import articlesService, { type ArticlesModel, type CreateArticleModel, type UpdateArticleModel } from '../services/articles.service';
-import userProfileService from '../services/userProfile.service';
 import { API } from './../routes/api.impl';
 import { upload, remove, type FileUploadOption, type FileUploadInfo } from '../util/files';
+import userProfileService from '../services/userProfile.service';
 
-// export function articleTitleExist(throwOnExist: boolean = false): Function {
-//   return (req: any, res: Response, next: NextFunction): void => {
-//   const whereClause: ArticlesModel = {
-//     created_by: req._passport.user.id,
-//     title: req.body.title
-//   };
-//   articlesService.get(whereClause)
-//     .then(articles => {
-//       if (throwOnExist && articles.length)
-//         next(API.conflict("KEY_EXIST"));
-//       // attach to request body so that we don't have to query the db in the next middleware.
-//       if (articles.length)
-//         req.body.__article__ = articles[0];
-//       next();
-//     })
-//     .catch(() => next(API.internalServerError("INTERNAL_SERVER_ERROR:GET_FAILED:CATEGORY")));
-//   }
-// };
-
-// export function deleteArticleFromStorage(req: any, res: Response, next: NextFunction): void {
-//   articlesService.get({ id: req.params.id })
-//   .then(articles => {
-//     const article = articles[0];
-//     remove(article.url);
-//     next();
-//   })
-//   .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:ARTICLE_WITH_ID_NON_EXISTENT")));
-// };
-
-export function uploadArticle(throwIfNoFile: boolean = false): Function {
+export function articleExist({ params, throwOnExist = false, checkId = false }: { params?: any, throwOnExist?: boolean, checkId?:boolean }): Function {
   return (req: any, res: Response, next: NextFunction): void => {
-    const option: FileUploadOption = { dstPath: `${req._passport.user.id}\\articles` };
-    const uploads: FileUploadInfo[] = [];
+    let append: any = {};
 
-    for (const file of req.files) {
-      const uploadInfo: FileUploadInfo = { file: file, option: option };
-      uploads.push(uploadInfo);
+    if (params != undefined) {
+      for (const param of params)
+        append[param[0]] = req.body[param[1]];
+    }
+
+    const whereClause: ArticlesModel = {
+      ...append,
+      ...(checkId && { id: parseInt(req.params.id) }),
+      created_by: req._passport.user_profile.user_account.id,
+      deleted_at: null
     };
-
-    // Extra checking to enforce the users to upload a file.
-    if (throwIfNoFile && !uploads.length)
-      return next(API.badRequest("BAD_REQUEST:NO_ARTICLE_TO_BE_CREATED"));
-
-    if (!uploads.length)
-      return next();
-
-    // We upload an array of files but we know that it's only ever going to be 1 file uploaded at a time.
-    upload(uploads)
-    .then(files => {
-      const article = files.shift();
-      req.body.__article__ = article;
+    articlesService.get(whereClause, { limit: 1 })
+    .then(articles => {
+      if (throwOnExist && articles.length)
+        next(API.conflict("CONFLICT:ARTICLE_TITLE_EXIST"));
+      // attach to request body so that we don't have to query the db in the next middleware.
+      if (articles && articles.length)
+        req.body.__article__ = articles[0];
       next();
     })
-    .catch(err => next(API.badRequest("BAD_REQUEST:ARTICLE_UPLOAD_ERROR")));
-  };
+    .catch((error) => next(API.internalServerError("INTERNAL_SERVER_ERROR:GET_FAILED:ARTICLE")));
+  }
 };
 
-// export function create(req: any, res: Response, next: NextFunction): void {
-//   userProfileService.get({ user_account_id: req._passport.user.id })
-//   .then(userProfiles => {
-//     const userProfile = userProfiles[0];
-//     const create: CreateArticleModel = {
-//       title: req.body.title,
-//       description: req.body.description,
-//       category_id: req.body.category_id,
-//       url: req.body.__article__?.url || "",
-//       created_by: userProfile.id
-//     };
-//     articlesService.createOne(create)
-//     .then(article => {
-//       const result = API.ok("Success!");
-//       result.attach(article);
-//       res.status(result.statusCode()).json(result);
-//     })
-//     .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:CREATE_ARTICLE_FAILED")));
-//   })
-//   .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:GET_USER_PROFILE_FAILED")));
-// };
+export function abortIfNonExistent(req: any, res: Response, next: NextFunction): void {
+  if (req.body.__article__ == undefined)
+    return next(API.notFound("NOT_FOUND:ARTICLES:NON_EXISTENT"));
+  next();
+};
 
-// export function update(req: any, res: Response, next: NextFunction): void {
-//   userProfileService.get({ user_account_id: req._passport.user.id })
-//   .then(userProfiles => {
-//     const userProfile = userProfiles[0];
-//     const update: UpdateArticleModel = {
-//       title: req.body?.title,
-//       description: req.body?.description,
-//       url: req.body?.__article__?.url,
-//       category_id: req.body?.category_id,
-//       edited_by: userProfile.id,
-//       edited_at: new Date()
-//     };
-//     articlesService.edit(update, req.params.id)
-//     .then(article => {
-//       const result = API.ok("Success!");
-//       result.attach(article);
-//       res.status(result.statusCode()).json(result);
-//     })
-//     .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:CREATE_ARTICLE_FAILED")));
-//   })
-//   .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:GET_USER_PROFILE_FAILED")));
-// };
+export function removeArticleHTML(req: any, res: Response, next: NextFunction): void {
+  // Don't have to delete anything if there's nothing to upload.
+  if (req.files == undefined || !req.files.length || req.body.__article__.url == null)
+    return next();
 
-// export function getArticleWithID(req: any, res: Response, next: NextFunction): void {
-//   const { id } = req.params;
-//   const article: ArticlesModel = { id: id };
-//   articlesService.get(article)
-//   .then(articles => {
-//     const result = API.ok("Success!");
-//     result.attach(articles[0]);
-//     res.status(result.statusCode()).json(result);
-//   })
-//   .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:GET_ARTICLE_FAIELD")));
-// };
+  const article: any = req.body.__article__;
+  const filename: string = (article.url != null && article.url.length) ? (article.url.split("/")).pop() : req.files[0].filename;
+  const path: string = `${process.env.NODE_ENV}/user_account_id_${req._passport.user_profile.user_account.id}/articles/${article.id}/${filename}`;
+  remove(path)
+  .then(() => next())
+  .catch((error: any) => next(API.badRequest("BAD_REQUEST:REMOVE_PROJECT_HTML_FAILED")));
+};
 
-// export function getArticleWithUserID(req: any, res: Response, next: NextFunction): void {
-//   userProfileService.get({ id: req.params.id })
-//   .then(userProfiles => {
-//     const userProfile = userProfiles[0];
-//     articlesService.get({ created_by: userProfile.id })
-//     .then(articles => {
-//       const result = API.ok("Success!");
-//       result.attach(articles);
-//       res.status(result.statusCode()).json(result);
-//     })
-//     .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:GET_ARTICLES_FAILED")));
-//   })
-//   .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:GET_USER_PROFILE_FAILED")));
-// };
+export function uploadArticleHTML(req: any, res: Response, next: NextFunction): void {
 
-export function deleteArticle(req: any, res: Response, next: NextFunction): void {
-  userProfileService.get({ user_account_id: req._passport.user.id })
-  .then(userProfiles => {
-    const userProfile = userProfiles[0];
-    articlesService.deleteOne(userProfile.id, req.params.id)
-    .then(() => {
+  if (req.files == undefined || !req.files.length)
+    return next();
+
+  const article: any = req.body.__article__;
+  const option: FileUploadOption = { dstPath: `${process.env.NODE_ENV}/user_account_id_${req._passport.user_profile.user_account.id}/articles/${article.id}` };
+  const uploads: FileUploadInfo[] = [];
+
+  for (const file of req.files) {
+    const uploadInfo: FileUploadInfo = { file: file, option: option };
+    uploads.push(uploadInfo);
+  };
+
+  upload(uploads)
+  .then(files => {
+    if (!files.length)
+      return next(API.badRequest("BAD_REQUEST:NO_DOCUMENT_HAVE_BEEN_UPLOADED"));
+
+    const file: any = files.shift();
+    req.body.__file__ = file;
+    next();
+  })
+  .catch(err => next(API.badRequest("BAD_REQUEST:ARTICLE_UPLOAD_ERROR")));
+};
+
+export function removeArticleNonPrimaryTags(req: any, res: Response, next: NextFunction): void {
+  if (req.body.tag_ids == undefined)
+    return next();
+
+  articlesService.removeArticleNonPrimaryTags(parseInt(req.params.id))
+  .then(() => {
+    next();
+  })
+  .catch(error => next(API.internalServerError("INTERNAL_SERVER_ERROR:COULD_NOT_REMOVE_NON_PRIMARY_TAGS")));
+};
+
+export function create(req: any, res: Response, next: NextFunction): void {
+
+  const params: CreateArticleModel = {
+    title: req.body.title,
+    description: req.body.description,
+    publish: false,
+    show: true,
+    tag_id: parseInt(req.body.tag_id)
+  };
+
+  articlesService.createOne(params, req._passport.user_profile.id)
+  .then(article => {
+    const result = API.ok("Success!");
+    result.attach(article);
+    res.status(result.statusCode()).json(result);
+  })
+  .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:CREATE_ARTICLE_FAILED")));
+};
+
+export function update(req: any, res: Response, next: NextFunction): void {
+  const update: UpdateArticleModel = {
+    title: req.body?.title,
+    description: req.body?.description,
+    url: req.body?.__file__?.url,
+    show: req.body.show,
+    publish: req.body.publish,
+    hash: req.body.hash
+  };
+
+  const tagIds: number[] = req.body.tag_ids || [];
+
+  articlesService.edit(update, parseInt(req.params.id), req._passport.user_profile.id, tagIds)
+  .then(article => {
+    const result = API.ok("Success!");
+    result.attach(article);
+    res.status(result.statusCode()).json(result);
+  })
+  .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:CREATE_ARTICLE_FAILED")));
+};
+
+export function getInternal(req: any, res: Response, next: NextFunction): void {
+  const { limit, cursor, order } = req.query;
+  const whereClause: ArticlesModel = {
+    created_by: req._passport.user_profile.id,
+    deleted_at: null,
+    deleted_by: null
+  };
+  articlesService.get(whereClause, {
+    ...(limit   != undefined && { limit: parseInt(limit) }),
+    ...(cursor  != undefined && { cursor: parseInt(cursor) }),
+    ...(order   != undefined && { order: order }),
+  })
+  .then(articles => {
+    const result = API.ok("Success!");
+    result.attach(articles);
+    res.status(result.statusCode()).json(result);
+  })
+  .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:FAILED_TO_GET_ARTICLES")));
+};
+
+export function getOne(req: any, res: Response, next: NextFunction): void {
+  articlesService.getOne(parseInt(req.params.id))
+  .then(articles => {
+   const result = API.ok("Success!");
+   result.attach(articles);
+   res.status(result.statusCode()).json(result);
+  })
+  .catch(error => next(API.internalServerError("INTERNAL_SERVER_ERROR:FAILED_TO_GET_PROJECT_WITH_ID")));
+ };
+
+export async function getPublic(req: any, res: Response, next: NextFunction) {
+  const { limit, cursor, order } = req.query;
+
+  userProfileService.getUserProfile(parseInt(req.body.user_account.id))
+  .then(userProfile => {
+
+    const whereClause: ArticlesModel = {
+      created_by: userProfile.id,
+      deleted_at: null,
+      deleted_by: null,
+      show: true,
+      publish: true
+    };
+
+    articlesService.getPublic(whereClause, {
+      ...(limit   != undefined && { limit: parseInt(limit) }),
+      ...(cursor  != undefined && { cursor: parseInt(cursor) }),
+      ...(order   != undefined && { limit: order }),
+    })
+    .then(articles => {
       const result = API.ok("Success!");
+      result.attach(articles);
       res.status(result.statusCode()).json(result);
     })
-    .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:DELETE_ARTICLE_FAILED")));
+    .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:FAILED_TO_GET_ARTICLES")));
+  });
+};
+
+export function deleteArticle(req: any, res: Response, next: NextFunction): void {
+  articlesService.deleteOne(parseInt(req.params.id), req._passport.user_profile.user_account.id)
+  .then(() => {
+    const result = API.ok("Success!");
+    res.status(result.statusCode()).json(result);
   })
-  .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:GET_USER_PROFILE_FAILED")));
+  .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:DELETE_ARTICLE_FAILED")));
 };

@@ -42,6 +42,7 @@ http.get(
 
 http.get(
   "public_user_profile",
+  userController.emailExist(),
   userProfileController.getPublicAccessUserProfile
 );
 

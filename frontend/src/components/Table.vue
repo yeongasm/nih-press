@@ -1,6 +1,6 @@
 <template>
   <div>
-    <table w-full border-spacing-0>
+    <table w-full border-spacing-0 :class="{ 'table-fixed': fixed != undefined }">
       <tr bg-gray-700 border-separate>
         <th
           v-for="column in props.columns"
@@ -24,15 +24,16 @@
                     :class="`hover:opacity-75`"
                     :style="{ 'border-color':button.main_color, 'color': button.main_color, 'background-color': button.secondary_color }"
                   >
-                    {{ button.display }}
+                    <span v-if="typeof button.display === 'function'">{{ button.display(row) }}</span>
+                    <span v-else>{{ button.display }}</span>
                   </div>
                 </div>
               </div>
-              <div v-else text-gray-400>
+              <div v-else break-words text-gray-400>
                 {{ props.configuration[column].display(row) }}
               </div>
             </span>
-            <span v-else text-gray-400>{{ row[column] }}</span>
+            <span v-else break-words text-gray-400>{{ row[column] }}</span>
           </td>
         </tr>
     </table>
@@ -42,7 +43,7 @@
 <script setup lang="ts">
 import { formatDateAs } from '@/util/util';
 
-const props = defineProps([ 'columns', 'data', 'alias', 'configuration' ]);
+const props = defineProps([ 'columns', 'data', 'alias', 'configuration', 'fixed' ]);
 const columnTitle = (key: string): string => {
   if (props.alias != undefined && props.alias[key] != undefined)
       return props.alias[key];

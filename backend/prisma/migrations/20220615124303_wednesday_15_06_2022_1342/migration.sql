@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `documents` ADD COLUMN `edited_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3);

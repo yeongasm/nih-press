@@ -1,22 +1,36 @@
 <template>
-  <PopupOverlay v-if="popUpMode != 'none'" @on-exit="popUpMode = 'none'; groupName = ''; resetCategoryParam()">
+  <PopupOverlay v-if="popUpMode != 'none'" @on-exit="popUpMode = 'none'; groupName = ''; resetTagParam()">
     <div p-3>
       <div>
         <div v-if="popUpMode == 'create_group' || popUpMode == 'edit_group'" flex flex-col justify-center items-start w-96 mb-3>
-          <Input w-full title="New Group Name" :default="groupName" @on-input="groupName = $event"/>
+          <Title mb-5>Create New Group</Title>
+          <Input w-full title="Name" :default="groupName" @on-input="groupName = $event"/>
         </div>
         <div v-else flex flex-col justify-center items-start mb-3 class="w-[500px]">
-          <div flex justify-between items-center w-full mb-2>
-            <Input class="w-[45%]" title="New Category Key" :default="category.key" @on-input="category.key = $event" input_style="padding: 1px; padding-left: 1rem; padding-right: 1rem"/>
-            <div class="w-[45%]">
-              <SubHeading>Type</SubHeading>
-              <v-select w-full :options="['bool', 'int', 'float', 'string']" v-model="category.type" />
+          <Title mb-5>Create New Tag</Title>
+          <!-- <div flex justify-between items-center w-full mb-2> -->
+          <Input w-full title="Key" :default="tag.key" @on-input="tag.key = $event" input_style="padding: 1px; padding-left: 1rem; padding-right: 1rem"/>
+          <!-- </div> -->
+          <Input w-full mb-2 title="Value" :default="tag.value" @on-input="tag.value = $event" input_style="padding: 1px; padding-left: 1rem; padding-right: 1rem"/>
+          <div flex justify-start items-center w-full mb-2>
+            <div w="3/5">
+              <SubHeading>Group</SubHeading>
+              <v-select
+                w-full
+                label="name"
+                :reduce="(group: any) => group.id"
+                :options="groupSelectionOptions"
+                v-model="selectedGroup"
+              />
             </div>
-          </div>
-          <Input w-full mb-2 title="Value" :default="category.value" @on-input="category.value = $event" input_style="padding: 1px; padding-left: 1rem; padding-right: 1rem"/>
-          <div w-full mb-2>
-            <SubHeading>Group</SubHeading>
-            <v-select w-full :options="groupSelectionOptions" v-model="selectedGroup" />
+            <div flex flex-col justify-center items-center flex-grow>
+              <SubHeading mb-1>Visible</SubHeading>
+              <Toggle v-model="tag.visible" />
+            </div>
+            <!-- <div flex flex-col justify-center items-center flex-grow>
+              <SubHeading mb-1>Is Primary</SubHeading>
+              <Toggle v-model="tag.isPrimary" />
+            </div> -->
           </div>
         </div>
       </div>
@@ -39,20 +53,27 @@
           :listen_to_enter="true"
           @on-click="buttonConfigs[popUpMode].on_submit"
         >
-          <span v-if="!showSpinner">Save</span>
+          <span v-if="!isSubmitting">Save</span>
           <div v-else class="w-[40px] h-[24px] spinner">
             <EllipsisSpinner background="#fff" :x="8" :y="8" />
           </div>
         </Button>
-    </div>
+      </div>
     </div>
   </PopupOverlay>
 
-  <div flex flex-row flex-wrap justify-start items-start w-full>
-    <div mx-5 class="w-2/5">
-      <Title>Groups</Title>
+  <ConfirmDialog v-if="showConfirmDialog" @on-positive="permaDelete" @on-negative="onDialogClose">
+    <Title mb-5>Warning</Title>
+    <div flex flex-row justify-start items-center mb-5>
+      Are you sure you want to permanently delete {{ deletingItemConfirmText }}.
+    </div>
+  </ConfirmDialog>
+
+  <div w-full grid grid-cols-2 gap-5>
+    <div>
+      <Title mb-4>Groups</Title>
       <SectionBody>
-        <Text>Groups, as the name suggests help group categories so they can be accessed easier. Groups help associate categories to a specific topic, discussion or feature. You can add, edit or remove groups.</Text>
+        <Text>Groups, as the name suggests help group tags so they can be accessed easier. Groups help associate tags to a specific topic, discussion or feature. You can add, edit or remove groups.</Text>
         <div mt-4>
           <div flex items-center justify-end mt-1 mb-2>
             <Button
@@ -102,10 +123,10 @@
       </SectionBody>
     </div>
 
-    <div class="w-2/5">
-      <Title>Categories</Title>
+    <div>
+      <Title mb-4>Tags</Title>
       <SectionBody>
-        <Text>Categories are like tags, you tag contents from your website to make them more accessible. They can also be linked to groups. You can add, edit or remove groups.</Text>
+        <Text>Tags are like signboards, you tag contents from your website to make them more accessible. They can also be linked to groups. You can add, edit or remove groups.</Text>
         <div mt-4>
           <div flex items-center justify-end mt-1 mb-2>
             <Button
@@ -114,19 +135,23 @@
               font_size="smalltext"
               style="padding: calc(1rem / 2); border-radius: 0.5rem"
               :enable="groupStore.userGroups.length ? true : false"
-              @on-click="popUpMode = 'create_category'"
+              @on-click="popUpMode = 'create_tag'"
             >
-              Create Category
+              Create Tag
             </Button>
           </div>
           <Table
-            v-if="categoryStore.userCategories.length"
-            :columns="['key', 'value', 'type', 'group', 'created_at', 'edited_at', 'action']"
-            :alias="{ key: 'Key', value: 'Value', type: 'Type', group: 'Group', created_at: 'Created At', edited_at: 'Edited At', action: 'Action' }"
+            v-if="tagStore.userTags.length"
+            :columns="['key', 'value', 'group', 'hidden', 'created_at', 'edited_at', 'action']"
+            :alias="{ key: 'Key', value: 'Value', hidden: 'Visibility', group: 'Group', created_at: 'Created At', edited_at: 'Edited At', action: 'Action' }"
             :configuration="{
+              hidden: {
+                type: 'custom',
+                display: (tag: any) => tag.hidden ? 'Hidden' : 'Visible'
+              },
               group: {
                 type: 'custom',
-                display: (category: any) => { return category?.group?.name },
+                display: (tag: any) => { return tag?.group?.name },
               },
               created_at: {
                 type: 'date',
@@ -141,20 +166,20 @@
                 list: [
                   {
                     display: 'edit',
-                    callback: editCategoryCb,
+                    callback: editTagCb,
                     secondary_color: '#fff',
                     main_color: '#54b95c'
                   },
                   {
                     display: 'delete',
-                    callback: deleteCategoryCb,
+                    callback: deleteTagCb,
                     secondary_color: '#fff',
                     main_color: '#c33a49'
                   }
                 ]
               }
             }"
-            :data="categoryStore.userCategories"
+            :data="tagStore.userTags"
           />
         </div>
       </SectionBody>
@@ -163,56 +188,94 @@
 </template>
 
 <script setup lang="ts">
-import 'vue-select/dist/vue-select.css';
+import Toggle from '@vueform/toggle';
 import { useGroupsStore } from '@/store/groups.store';
-import { useCategoriesStore } from '@/store/categories.store';
-const groupStore = useGroupsStore();
-const categoryStore = useCategoriesStore();
+import { useTagStore } from '@/store/tags.store';
 
-groupStore.getGroups();
-categoryStore.getCategories();
+type PopupOpenMode  = 'none' | 'create_group' | 'edit_group' | 'create_tag' | 'edit_tag';
+type DeletingItem   = 'groups' | 'tags';
 
-type PopupOpenMode = 'none' | 'create_group' | 'edit_group' | 'create_category' | 'edit_category';
-
-const selectedGroup = ref(groupStore.userGroups.length ? groupStore.userGroups[0].name : "");
+const deletingItem = ref<DeletingItem>('groups');
+const showConfirmDialog = ref(false);
+const selectedGroup = ref<number>(0);
 const selectedId = ref(-1);
 const groupName = ref("");
 const popUpMode = ref<PopupOpenMode>("none");
-const showSpinner = ref(0);
-const category = reactive({
+const isSubmitting = ref<boolean>(false);
+const tag = reactive({
   key: "",
   value: "",
-  type: "bool"
+  visible: true
 });
 
-const editCategoryOnClick = (inCategory: any) => {
+const groupStore = useGroupsStore();
+const tagStore = useTagStore();
 
-  const group: any = inCategory.group;
+groupStore.getGroups().then(() => {
+  groupStore.userGroups.length && (selectedGroup.value = groupStore.userGroups[0].id);
+});
+tagStore.getTags();
 
-  selectedId.value = inCategory.id;
+const editTagOnClick = (inTag: any) => {
 
-  category.key = inCategory.key;
-  category.value = inCategory.value;
-  category.type = inCategory.type;
-  selectedGroup.value = group.name;
+  const group: any = inTag.group;
 
-  popUpMode.value = 'edit_category';
+  selectedId.value = inTag.id;
+
+  tag.key = inTag.key;
+  tag.value = inTag.value;
+  tag.visible = !inTag.hidden;
+  selectedGroup.value = group.id;
+
+  popUpMode.value = 'edit_tag';
+
 };
 
 const editGroupCb       = (group: any) => { selectedId.value = group.id; popUpMode.value = 'edit_group'; };
-const deleteGroupCb     = (group: any) => groupStore.deleteGroup(group.id);
-const editCategoryCb    = (category: any) => { editCategoryOnClick(category); };
-const deleteCategoryCb  = (category: any) => categoryStore.deleteCategory(category.id);
+const deleteGroupCb     = (group: any) => { deletingItem.value = 'groups'; selectedId.value = group.id; showConfirmDialog.value = true; };
+const editTagCb    = (tag: any) => { editTagOnClick(tag); };
+const deleteTagCb  = (tag: any) => { deletingItem.value = 'tags'; selectedId.value = tag.id; showConfirmDialog.value = true; }
 
-const resetCategoryParam = () => {
-  category.key = "";
-  category.value = "";
-  category.type = "bool";
-  selectedGroup.value = groupStore.userGroups.length ? groupStore.userGroups[0].name : "";
+
+const onDialogClose = () => {
+  selectedId.value = -1;
+  showConfirmDialog.value = false;
+};
+const permaDelete = () => {
+
+  if (deletingItem.value == 'groups')
+    groupStore.deleteGroup(selectedId.value);
+
+  if (deletingItem.value == 'tags')
+    tagStore.deleteTag(selectedId.value);
+
+  onDialogClose();
+};
+
+const resetTagParam = () => {
+  tag.key = "";
+  tag.value = "";
+  tag.visible = true;
+  selectedGroup.value = groupStore.userGroups[0].id;
   popUpMode.value = 'none';
 };
 
-const groupSelectionOptions = computed(() => Array.from(groupStore.userGroups, (group: any) => group.name));
+const groupSelectionOptions = computed(() => Array.from(groupStore.userGroups));
+const deletingItemConfirmText = computed(() => {
+  let outputTxt : string = '';
+  if (deletingItem.value == 'groups') {
+    for (const group of groupStore.userGroups) {
+      if (group.id == selectedId.value)
+        outputTxt = `group with name [ ${group.name} ]`;
+    }
+  } else {
+    for (const tag of tagStore.userTags) {
+      if (tag.id == selectedId.value)
+        outputTxt = `tag with key [ ${tag.key} ]`;
+    }
+  }
+  return outputTxt;
+});
 
 const buttonConfigs = reactive({
   'create_group': {
@@ -222,13 +285,15 @@ const buttonConfigs = reactive({
       popUpMode.value = 'none';
     },
     on_submit: () => {
-      showSpinner.value = 1;
-      groupStore.newGroup(groupName.value)
-      .then(() => {
-        groupName.value = "";
-        showSpinner.value = 0;
-        popUpMode.value = 'none';
-      });
+      if (!isSubmitting.value) {
+        isSubmitting.value = true;
+        groupStore.newGroup(groupName.value)
+        .then(() => {
+          groupName.value = "";
+          isSubmitting.value = false;
+          popUpMode.value = 'none';
+        });
+      }
     }
   },
   'edit_group': {
@@ -238,61 +303,77 @@ const buttonConfigs = reactive({
       popUpMode.value = 'none';
     },
     on_submit: () => {
-      showSpinner.value = 1;
-      groupStore.editGroup(groupName.value, selectedId.value)
-      .then(() => {
-        selectedId.value = -1;
-        groupName.value = "";
-        showSpinner.value = 0;
-        popUpMode.value = 'none';
-      });
+      if (!isSubmitting.value) {
+        isSubmitting.value = true;
+        groupStore.editGroup(groupName.value, selectedId.value)
+        .then(() => {
+          selectedId.value = -1;
+          groupName.value = "";
+          isSubmitting.value = false;
+          popUpMode.value = 'none';
+        });
+      }
     }
   },
-  'create_category': {
+  'create_tag': {
     enable_if: computed(() => {
-      return category.key.length && category.value.length && category.type.length && selectedGroup.value.length;
+      return tag.key.length && tag.value.length && (selectedGroup.value != 0);
     }),
-    on_cancel: () => resetCategoryParam(),
+    on_cancel: () => resetTagParam(),
     on_submit: () => {
-      showSpinner.value = 1;
-      categoryStore.newCategory(category.key, category.value, category.type, selectedGroup.value)
-      .then(() => {
-        resetCategoryParam();
-        selectedId.value = -1;
-        showSpinner.value = 0;
-      });
+      if (!isSubmitting.value) {
+        isSubmitting.value = true;
+        tagStore.newTag({
+          key: tag.key, value: tag.value, visible: tag.visible, groupId: selectedGroup.value
+        })
+        .then(() => {
+          resetTagParam();
+          selectedId.value = -1;
+          isSubmitting.value = false;
+        });
+      }
     }
   },
-  'edit_category': {
+  'edit_tag': {
     enable_if: computed(() => {
-      const allFilled: boolean = (category.key.length && category.value.length && category.type.length && selectedGroup.value.length) ? true : false;
+      const allFilled: boolean = (tag.key.length && tag.value.length && (selectedGroup.value != 0)) ? true : false;
 
       if (!allFilled)
         return false;
 
       let hasChange: boolean = false;
 
-      const editingCategory = categoryStore.userCategories[categoryStore.userCategories.findIndex((category: any) => category.id == selectedId.value)];
+      const editingTag = tagStore.userTags[tagStore.userTags.findIndex((tag: any) => tag.id == selectedId.value)];
 
-      hasChange = ((editingCategory.key != category.key) || (editingCategory.value != category.value) || (editingCategory.type != category.type) || (editingCategory.group.name != selectedGroup.value) ? true : false);
+      hasChange = ((editingTag.key != tag.key) || (editingTag.value != tag.value) || (editingTag.group.name != selectedGroup.value) || (editingTag.hidden != !tag.visible) ? true : false);
 
       return hasChange;
     }),
-    on_cancel: () => resetCategoryParam(),
+    on_cancel: () => resetTagParam(),
     on_submit: () => {
-      showSpinner.value = 1;
-      categoryStore.editCategory(category.key, category.value, category.type, selectedGroup.value, selectedId.value)
-      .then(() => {
-        resetCategoryParam();
-        selectedId.value = -1;
-        showSpinner.value = 0;
-      });
+      if (!isSubmitting.value) {
+        isSubmitting.value = true;
+        const editingTag = tagStore.userTags[tagStore.userTags.findIndex((tag: any) => tag.id == selectedId.value)];
+        const payload: any = {
+          ...(tag.key   != editingTag.key && { key: tag.key }),
+          ...(tag.value != editingTag.value && { value: tag.value }),
+          ...(!tag.visible  != editingTag.hidden && { hidden: !tag.visible }),
+          ...((selectedGroup.value != editingTag.group.id && selectedGroup.value != 0) && { group_id: selectedGroup.value })
+        };
+        tagStore.editTag(payload, selectedId.value)
+        .then(() => {
+          resetTagParam();
+          selectedId.value = -1;
+          isSubmitting.value = false;
+        });
+      }
     }
   }
 });
 
 </script>
 
+<style src="@vueform/toggle/themes/default.css"></style>
 <style scoped>
 .transition {
   transition: background-color 0.3s ease-in-out;

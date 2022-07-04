@@ -1,47 +1,50 @@
 import http, { validateRequestSchema } from './api.impl';
 import * as articlesController from '../controllers/articles.controller';
+import * as userController from '../controllers/user.controller';
 import articleSchema from '../schema/articles.schema';
 import { isUserAuthenticated } from '../auth/auth.impl';
 import { storeFile, onlyAllowFilesWithExtension } from '../util/files';
 
 
-// http.post(
-//   "article",
-//   isUserAuthenticated,
-//   validateRequestSchema(articleSchema.createArticle),
-//   articlesController.articleTitleExist(true),
-//   storeFile.array("file", 1),
-//   onlyAllowFilesWithExtension([ 'article' ]),
-//   articlesController.uploadArticle(true),
-//   articlesController.create
-// );
+http.post(
+  "article",
+  isUserAuthenticated,
+  validateRequestSchema(articleSchema.createArticle),
+  articlesController.articleExist({ params: [ [ "title", "title" ] ], throwOnExist: true }),
+  articlesController.create
+);
 
-// http.patch(
-//   "article/:id",
-//   isUserAuthenticated,
-//   validateRequestSchema(articleSchema.updateArticle),
-//   articlesController.articleTitleExist(true),
-//   articlesController.deleteArticleFromStorage,
-//   storeFile.array("file", 1),
-//   onlyAllowFilesWithExtension([ 'article' ]),
-//   articlesController.uploadArticle,
-//   articlesController.update
-// );
+http.patch(
+  "article/:id",
+  isUserAuthenticated,
+  storeFile.array("file", 1),
+  onlyAllowFilesWithExtension([ 'html' ]),
+  validateRequestSchema(articleSchema.updateArticle),
+  articlesController.articleExist({ checkId: true }),
+  articlesController.abortIfNonExistent,
+  articlesController.removeArticleHTML,
+  articlesController.uploadArticleHTML,
+  articlesController.removeArticleNonPrimaryTags,
+  articlesController.update
+);
 
-// NOTE:
-// This route is wrong and serves no purpose.
-// http.get(
-//   "article/:id",
-//   articlesController.getArticleWithID
-// );
+http.get(
+  "articles",
+  isUserAuthenticated,
+  articlesController.getInternal
+);
 
-// NOTE:
-// This route is also wrong.
-// Needs rework.
-// http.get(
-//   "articles/:user_id",
-//   articlesController.getArticleWithUserID
-// );
+http.get(
+  "article/:id",
+  isUserAuthenticated,
+  articlesController.getOne
+)
+
+http.get(
+  "public_articles",
+  userController.emailExist(),
+  articlesController.getPublic
+);
 
 http.delete(
   "article/:id",

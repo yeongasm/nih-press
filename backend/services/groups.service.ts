@@ -15,14 +15,62 @@ export interface CreateGroupModel {
   created_by: number
 };
 
-export function getGroups(where: GroupModel, select: string[] = []): Promise<any> {
+export function getGroups(
+  whereClause: GroupModel,
+  {
+    cursorId = undefined,
+    limit = 10,
+    order = 'desc'
+  }: {
+    cursorId?: number,
+    limit?: number,
+    order?: 'asc' | 'desc'
+  }): Promise<any> {
   return new Promise<any>((resolve, reject) => {
-    const whereClause: any = where;
-    let selectClause: any = {};
-    select.length && select.forEach(param => selectClause[param] = true);
     prisma.groups.findMany({
-      ...(select.length && { select: selectClause }),
-      where: whereClause
+      take: limit,
+      ...(cursorId != undefined && {
+        skip: 1,
+        cursor: { id: cursorId }
+      }),
+      select: {
+        id: true,
+        name: true,
+        created_at: true,
+        edited_at: true
+      },
+      where: whereClause,
+      orderBy: { id: order }
+    })
+    .then(res => resolve(res))
+    .catch(err => reject(err));
+  });
+};
+
+export function getPublic(
+  whereClause: GroupModel,
+  {
+    cursorId = undefined,
+    limit = 10,
+    order = 'desc'
+  }: {
+    cursorId?: number,
+    limit?: number,
+    order?: 'asc' | 'desc'
+  }): Promise<any> {
+  return new Promise<any>((resolve, reject) => {
+    prisma.groups.findMany({
+      take: limit,
+      ...(cursorId != undefined && {
+        skip: 1,
+        cursor: { id: cursorId }
+      }),
+      select: {
+        id: true,
+        name: true
+      },
+      where: whereClause,
+      orderBy: { id: order }
     })
     .then(res => resolve(res))
     .catch(err => reject(err));
@@ -66,6 +114,7 @@ export function deleteGroup(groupID: number): Promise<groups> {
 
 export default {
   getGroups,
+  getPublic,
   createOne,
   updateGroupName,
   deleteGroup

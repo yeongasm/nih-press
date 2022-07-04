@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import groupsService, { type GroupModel, type CreateGroupModel } from '../services/groups.service';
+import tagService, { type TagModel } from '../services/tags.service';
 import { API } from './../routes/api.impl';
 
 /**
@@ -7,14 +8,21 @@ import { API } from './../routes/api.impl';
  * @param param - object's key in the requests body that carries the name of the group.
  * @param throwOnExist - Returns a conflict on the request if the group exists when set to true.
  */
-export function groupExists({ param, throwOnExist = false }: { param: string, throwOnExist?: boolean }): Function {
+export function groupExists({ params, throwOnExist = false }: { params?: any, throwOnExist?: boolean }): Function {
   return (req: any, res: Response, next: NextFunction): void => {
-    const searchClause: GroupModel = {
-      name: req.body[param],
-      created_by: req._passport.user.id,
+    let append: any = {};
+
+    if (params != undefined) {
+      for (const param of params)
+        append[param[0]] = req.body[param[1]];
+    }
+
+    const whereClause: GroupModel = {
+      ...append,
+      created_by: req._passport.user_profile.user_account.id,
       deleted_at: null
     };
-    groupsService.getGroups(searchClause)
+    groupsService.getGroups(whereClause, { limit: 1 })
     .then(groups => {
       if (throwOnExist && groups.length)
         next(API.conflict("GROUP_EXIST"));
@@ -30,7 +38,7 @@ export function groupExists({ param, throwOnExist = false }: { param: string, th
 export function createGroup(req: any, res: Response, next: NextFunction): void {
   const newGroup: CreateGroupModel = {
     name: req.body.name,
-    created_by: req._passport.user.id
+    created_by: req._passport.user_profile.user_account.id
   };
   groupsService.createOne(newGroup)
   .then(group => {
@@ -42,13 +50,16 @@ export function createGroup(req: any, res: Response, next: NextFunction): void {
 };
 
 export function getAllGroupsForUser(req: any, res: Response, next: NextFunction): void {
-  // NOTE:
-  // req.body.user_account.id is set by the previous middleware
-  const groupSearchParams: GroupModel = {
-    created_by: req._passport.user.id || req.body.user_account.id,
+  const { limit, cursor, order } = req.query;
+  const whereClause: GroupModel = {
+    created_by: req._passport.user_profile.user_account.id,
     deleted_at: null
   };
-  groupsService.getGroups(groupSearchParams, [ 'id', 'name', 'created_by', 'created_at', 'edited_at' ])
+  groupsService.getGroups(whereClause, {
+    ...(limit   != undefined && { limit: parseInt(limit) }),
+    ...(cursor  != undefined && { cursor: parseInt(cursor) }),
+    ...(order   != undefined && { order: order }),
+  })
   .then(groups => {
     const result = API.ok("Success!");
     result.attach(groups);
@@ -57,19 +68,43 @@ export function getAllGroupsForUser(req: any, res: Response, next: NextFunction)
   .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:GET_FAILED:GROUPS")));
 };
 
-// export function getGroupWithId(req: any, res: Response, next: NextFunction): void {
-//   const groupSearchParams: GroupModel = {
-//     id: req.query.id,
-//     deleted_at: null
-//   };
-//   groupsService.getGroups(groupSearchParams)
-//   .then(groups => {
-//     const result = API.ok("Success!");
-//     result.attach(groups);
-//     res.status(result.statusCode()).json(result);
-//   })
-//   .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:GET_FAILED:GROUPS")));
-// };
+export function getPublicGroups(req: any, res: Response, next: NextFunction): void {
+  const { limit, cursor, order } = req.query;
+  // NOTE:
+  // req.body.user_account.id is set by the previous middleware
+  const whereClause: GroupModel = {
+    created_by: req._passport.user_profile.user_account.id || req.body.user_account.id,
+    deleted_at: null
+  };
+  groupsService.getPublic(whereClause, {
+    ...(limit   != undefined && { limit: parseInt(limit) }),
+    ...(cursor  != undefined && { cursor: parseInt(cursor) }),
+    ...(order   != undefined && { order: order }),
+  })
+  .then(groups => {
+    const result = API.ok("Success!");
+    result.attach(groups);
+    res.status(result.statusCode()).json(result);
+  })
+  .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:GET_FAILED:GROUPS")));
+};
+
+export function isGroupReferenced(throwOnReferenced: boolean = true): Function {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const categorySearchParam: TagModel = {
+      group_id: parseInt(req.params.id),
+      deleted_at: null
+    };
+
+    tagService.getTag(categorySearchParam, { limit: 1 })
+    .then(tags => {
+      if (tags.length && throwOnReferenced)
+        return next(API.badRequest("BAD_REQUEST:GROUP_STILL_REFERENCED"));
+      next();
+    })
+    .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:UNABLE_TO_FETCH_CATEGORIES")));
+  };
+};
 
 export function editGroup(req: any, res: Response, next: NextFunction): void {
   groupsService.updateGroupName(req.body.name, parseInt(req.params.id))

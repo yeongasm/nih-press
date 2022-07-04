@@ -8,7 +8,7 @@ http.post(
   "group",
   isUserAuthenticated,
   validateRequestSchema(groupSchema.newGroup),
-  groupController.groupExists({ param: "name", throwOnExist: true }),
+  groupController.groupExists({ params: [ [ "name", "name" ] ], throwOnExist: true }),
   groupController.createGroup
 );
 
@@ -21,7 +21,7 @@ http.get(
 http.get(
   "public_groups",
   userController.emailExist(),
-  groupController.getAllGroupsForUser
+  groupController.getPublicGroups
 )
 
 // http.get(
@@ -34,12 +34,13 @@ http.patch(
   "group/:id",
   isUserAuthenticated,
   validateRequestSchema(groupSchema.editGroup),
-  groupController.groupExists({ param: "name", throwOnExist: true }),
+  groupController.groupExists({ params: [ [ "name", "name" ] ], throwOnExist: true }),
   groupController.editGroup
 );
 
 http.delete(
   "group/:id",
   isUserAuthenticated,
+  groupController.isGroupReferenced(),
   groupController.removeGroupWithId
 );

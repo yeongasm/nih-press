@@ -83,7 +83,7 @@ export const useUserStore = defineStore("user", {
           $assert(
             `
             Failed to update user profile.
-            ${error?.response?.data && "Server responded with: " + error?.response?.data}
+            ${error?.response?.data && "Server responded with: " + JSON.stringify(error?.response?.data) }
             `,
             "error"
           );

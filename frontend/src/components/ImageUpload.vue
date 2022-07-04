@@ -58,6 +58,7 @@ const triggerRemoveClick = () => {
   emit('on-delete');
   hasFile.value = false;
 };
+
 // const listOfFiles = ref(null);
 // const imageUrl = computed(() => URL.createObjectURL(listOfFiles.value[0]));
 // const showOverlay = ref(false);

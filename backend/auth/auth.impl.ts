@@ -6,9 +6,8 @@ import fs from 'fs';
 import jsonwebtoken from 'jsonwebtoken';
 import { PUBLIC_KEY_PATH, PRIVATE_KEY_PATH } from '../util/paths';
 import { type user_accounts } from '@prisma/client';
-import { API, parseCookies } from '../routes/api.impl';
-import userAccountService, { type UserAccountModel } from '../services/users.services';
-// import userSessionService, { type UserSessionModel } from '../services/sessions.services';
+import { API } from '../routes/api.impl';
+import userProfileService from '../services/userProfile.service';
 import * as redis from '../util/redis';
 import calendar from '../util/dayjs';
 // import { debugPrintf } from '../util/debug';
@@ -27,7 +26,6 @@ const options: StrategyOptions = {
  */
 passport.use(new JwtStrategy(options, (jwtPayload, done) => {
 
-  const param: UserAccountModel = { id: jwtPayload.sub };
   const token = jwtPayload.session_token;
 
   redis.get(token)
@@ -41,10 +39,11 @@ passport.use(new JwtStrategy(options, (jwtPayload, done) => {
     if (calendar.isDateAfter(new Date(), session.expires_at))
       return done(API.forbidden("SESSION_EXPIRED"), false);
 
-    userAccountService.getUserWith(param)
-      .then(userAccount => {
-        if (userAccount)
-          return done(null, userAccount);
+    userProfileService.getUserProfile(parseInt(jwtPayload.sub))
+      .then(userProfile => {
+        const profile = userProfile[0];
+        if (profile)
+          return done(null, profile);
 
         done(null, false);
       })
@@ -112,7 +111,7 @@ export function isUserAuthenticated(req: any, res: Response, next: NextFunction)
       return next(err || API.forbidden("ACCESS_TOKEN_ABSENT"));
     }
 
-    req._passport.user = user;
+    req._passport.user_profile = user;
     next();
   })(req, res, next);
 };

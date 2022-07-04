@@ -3,28 +3,28 @@ import axios from '@/util/axios';
 import { queryStringFromObj, apiUrl } from '@/util/util';
 import { $assert } from './assert.store';
 
-export const useCategoriesStore = defineStore('categories', {
+export const useTagStore = defineStore('tags', {
   state: () => ({
-    categories: [] as any[]
+    tags: [] as any[]
   }),
   getters: {
-    userCategories: (state) => state.categories
+    userTags: (state) => state.tags
   },
   actions: {
 
-    getCategories(): Promise<void> {
+    getTags(): Promise<void> {
       return new Promise<void>(resolve => {
-        axios.get(apiUrl("categories"), { withCredentials: true })
+        axios.get(apiUrl("tags"), { withCredentials: true })
         .then((response: any) => {
           if (response?.data?.payload.length)
-            this.categories = response.data.payload;
-          $assert("Categories fetched!");
+            this.tags = response.data.payload;
+          $assert("Tags fetched!");
           resolve();
         })
         .catch((error: any) => {
           $assert(
             `
-            Failed to fetch categories.
+            Failed to fetch tags.
             ${error?.response?.data && "Server responded with - " + JSON.stringify(error?.response?.data) }
             `,
             "error"
@@ -34,36 +34,75 @@ export const useCategoriesStore = defineStore('categories', {
       });
     },
 
-    getCategoriesWithEmail(): Promise<boolean> {
+    getTagsWithEmail(): Promise<boolean> {
       return new Promise<boolean>((resolve) => {
-        axios.get(apiUrl("public_categories") + queryStringFromObj({ email: import.meta.env.VITE_USER_EMAIL }))
+        axios.get(apiUrl("public_tags") + queryStringFromObj({ email: import.meta.env.VITE_USER_EMAIL }))
         .then((response: any) => {
           if (response?.data?.payload.length)
-            this.categories = response.data.payload
+            this.tags = response.data.payload
           resolve(true);
         })
         .catch(() => resolve(false));
       });
     },
 
-    newCategory(key: string, value: string, type: 'bool' | 'int' | 'float' | 'string', groupName: string): Promise<boolean> {
-      return new Promise<boolean>((resolve) => {
-        axios.post(apiUrl("categories"), {
+    newTag({
+      key,
+      value,
+      visible,
+      isPrimaryTag,
+      groupId
+    }: {
+      key: string,
+      value: string,
+      visible: boolean,
+      groupId: number
+      isPrimaryTag?: boolean
+    }): Promise<boolean> {
+      return new Promise<any>((resolve) => {
+        axios.post(apiUrl("tag"), {
           key: key,
           value: value,
-          type: type,
-          ...((groupName != undefined) && { group: groupName })
-        }, { withCredentials: true })
+          hidden: !visible,
+          group_id: groupId,
+          ...(isPrimaryTag != undefined && { is_primary_tag: isPrimaryTag }),
+        }, {
+          withCredentials: true
+        })
         .then((response: any) => {
           if (response?.data?.payload)
-            this.categories.push(response.data.payload);
-          $assert(`Category [ ${key} ] created!`);
+            this.tags.push(response.data.payload);
+          $assert(`Tag [ ${key} ] created!`);
+          resolve(response.data.payload);
+        })
+        .catch((error: any) => {
+          $assert(
+            `
+            Failed to create new tag [ ${key} ].
+            ${error?.response?.data && "Server responded with - " + JSON.stringify(error?.response?.data) }
+            `,
+            "error"
+          );
+          resolve(null);
+        });
+      });
+    },
+
+    editTag(params: any, tagId: number): Promise<boolean> {
+      return new Promise<boolean>((resolve) => {
+        axios.patch(apiUrl(`tag/${tagId}`), params, { withCredentials: true })
+        .then((response: any) => {
+
+          if (response?.data?.payload)
+            this.tags[this.tags.findIndex(tag => tag.id == tagId)] = response.data.payload;
+
+          $assert(`Tag with id [ ${tagId} ] edited!`);
           resolve(true);
         })
         .catch((error: any) => {
           $assert(
             `
-            Failed to create new category [ ${key} ].
+            Failed to edit tag with id [ ${tagId} ].
             ${error?.response?.data && "Server responded with - " + JSON.stringify(error?.response?.data) }
             `,
             "error"
@@ -73,47 +112,18 @@ export const useCategoriesStore = defineStore('categories', {
       });
     },
 
-    editCategory(key: string, value: string, type: 'bool' | 'int' | 'float' | 'string', groupName: string, categoryId: number): Promise<boolean> {
+    deleteTag(id: number): Promise<boolean> {
       return new Promise<boolean>((resolve) => {
-        axios.patch(apiUrl(`categories/${categoryId}`), {
-          key: key,
-          value: value,
-          type: type,
-          ...((groupName != undefined) && { group: groupName })
-        }, { withCredentials: true })
-        .then((response: any) => {
-
-          if (response?.data?.payload)
-            this.categories[this.categories.findIndex(category => category.id == categoryId)] = response.data.payload;
-
-          $assert(`Category with id [ ${categoryId} ] edited!`);
-          resolve(true);
-        })
-        .catch((error: any) => {
-          $assert(
-            `
-            Failed to edit new category [ ${key} ].
-            ${error?.response?.data && "Server responded with - " + JSON.stringify(error?.response?.data) }
-            `,
-            "error"
-          );
-          resolve(false);
-        });
-      });
-    },
-
-    deleteCategory(id: number): Promise<boolean> {
-      return new Promise<boolean>((resolve) => {
-        axios.delete(apiUrl(`categories/${id}`))
+        axios.delete(apiUrl(`tag/${id}`))
         .then(() => {
-          this.categories.splice(this.categories.findIndex(category => category.id == id), 1);
-          $assert("Category deleted!");
+          this.tags.splice(this.tags.findIndex(tag => tag.id == id), 1);
+          $assert("Tag deleted!");
           resolve(true);
         })
         .catch((error: any) => {
           $assert(
             `
-            Failed to delete category with id [ ${id} ].
+            Failed to delete tag with id [ ${id} ].
             ${error?.response?.data && "Server responded with - " + JSON.stringify(error?.response?.data) }
             `,
             "error"
