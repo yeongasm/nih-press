@@ -24,7 +24,7 @@
     <div overflow-y-auto w-full mb-15>
       <Title mb-5 v-if="showShortBioAndTitle">{{ routeName }}</Title>
       <router-view />
-      <SmallText element="div" text-center>Personal work &#169; Al-Afiq Yeong {{ year }}. Codes are public domain unless specified. Opinions are my own.</SmallText>
+      <SmallText element="div" text-center>Personal work &#169; Al-Afiq Yeong {{ year }}. Codes are public domain unless specified. Opinions are my own. nihpress version {{ websiteVersion }}</SmallText>
     </div>
   </div>
 </template>
@@ -41,6 +41,7 @@ const routeName = computed(() => {
 });
 const showShortBioAndTitle = computed(() => Object.keys(useRoute().params).length == 0);
 const year = computed(() => new Date().getFullYear());
+const websiteVersion = computed(() => import.meta.env.VITE_WEBSITE_VER);
 </script>
 
 <style>
