@@ -1,0 +1,40 @@
+{
+  "name": "personal_website",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.1.1",
+    "@fortawesome/free-brands-svg-icons": "^6.1.1",
+    "@fortawesome/free-solid-svg-icons": "^6.1.1",
+    "@fortawesome/vue-fontawesome": "^3.0.1",
+    "@tinymce/tinymce-vue": "^4.0.7",
+    "@vueform/toggle": "^2.0.2",
+    "axios": "^0.27.2",
+    "dayjs": "^1.11.3",
+    "dotenv": "^16.0.0",
+    "pinia": "^2.0.14",
+    "sharp": "^0.30.6",
+    "vue": "^3.2.25",
+    "vue-router": "^4.0.14",
+    "vue-select": "^4.0.0-beta.3"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.23",
+    "@types/sharp": "^0.30.4",
+    "@types/vue-select": "^3.16.0",
+    "@vitejs/plugin-vue": "^2.2.0",
+    "typescript": "^4.5.4",
+    "unocss": "^0.30.7",
+    "unplugin-auto-import": "^0.6.8",
+    "unplugin-vue-components": "^0.18.5",
+    "vite": "^2.8.0",
+    "vite-plugin-pages": "^0.22.0",
+    "vite-plugin-vue-layouts": "^0.6.0",
+    "vue-tsc": "^0.29.8"
+  }
+}

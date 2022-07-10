@@ -1,0 +1,175 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model user_accounts {
+  id Int @id @unique @default(autoincrement())
+  username String @unique @db.VarChar(64)
+  email String @unique @db.VarChar(255)
+  password String
+  created_at DateTime @default(now())
+
+  projects projects[]
+  tags tags[]
+  documents documents[]
+  user_profile user_profile?
+  groups groups[]
+}
+
+model user_profile {
+  id Int @id @unique @default(autoincrement())
+  user_account user_accounts @relation(fields: [user_account_id], references: [id])
+  user_account_id Int @unique
+  display_name String? @db.VarChar(255)
+  location String? @db.VarChar(255)
+
+  written articles[] @relation("ArticleWrittenBy")
+  edited articles[] @relation("ArticleEditedBy")
+  deleted articles[] @relation("ArticleDeletedBy")
+
+  profile_img_url String? @db.VarChar(255)
+  profile_banner_url String? @db.VarChar(255)
+  resume_url String? @db.VarChar(255)
+}
+
+model articles {
+  id Int @id @default(autoincrement())
+  title String @db.VarChar(255)
+  description String? @db.VarChar(255)
+  url String? @db.VarChar(255)
+  hash Int @default(0)
+  show Boolean @default(true)
+  publish Boolean @default(false)
+  created_at DateTime @default(now())
+  author user_profile @relation("ArticleWrittenBy", fields: [created_by], references: [id])
+  created_by Int
+  edited_at DateTime @default(now())
+  editor user_profile @relation("ArticleEditedBy", fields: [edited_by], references: [id])
+  edited_by Int
+  deleted_at DateTime?
+  deleter user_profile? @relation("ArticleDeletedBy", fields: [deleted_by], references: [id])
+  deleted_by Int?
+
+  article_tags articles_tag_entries[]
+
+  @@index([title, created_at])
+}
+
+enum ProjectRepoType {
+  none
+  github
+  gitlab
+  bitbucket
+}
+
+model projects {
+  id Int @id @default(autoincrement())
+  title String @db.VarChar(255)
+  description String? @db.VarChar(255)
+  banner_img_url String? @db.VarChar(255)
+  content_url String? @db.VarChar(255)
+  repo_url String? @db.VarChar(255)
+  repo_type ProjectRepoType @default(none)
+  hash Int @default(0)
+  show Boolean @default(true)
+  publish Boolean @default(false)
+  owner user_accounts @relation(fields: [owned_by], references: [id])
+  owned_by Int
+  created_at DateTime @default(now())
+  edited_at DateTime @default(now())
+  deleted_at DateTime?
+
+  project_tags project_tag_entries[]
+
+  @@index([title])
+}
+
+model tags {
+  id Int @id @default(autoincrement())
+  key String @db.VarChar(255)
+  value String @db.VarChar(255)
+  // type CategoryValType @default(int)
+  hidden Boolean @default(false)
+  is_primary_tag Boolean @default(false)
+  group groups? @relation(fields: [group_id], references: [id])
+  group_id Int?
+  owner user_accounts @relation(fields: [created_by], references: [id])
+  created_by Int
+  created_at DateTime @default(now())
+  edited_at DateTime @default(now())
+  deleted_at DateTime?
+
+  article_tag_entries articles_tag_entries[]
+  document_tag_entries document_tag_entries[]
+  project_tag_entries project_tag_entries[]
+
+  @@index([key])
+}
+
+model groups {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(255)
+  group_owner user_accounts @relation(fields: [created_by], references: [id])
+  created_by Int
+  created_at DateTime @default(now())
+  edited_at DateTime @default(now())
+  deleted_at DateTime?
+
+  tags tags[]
+
+  @@index([name])
+}
+
+enum DocumentType {
+  image
+  pdf
+}
+
+model documents {
+  id Int @id @default(autoincrement())
+  original_filename String @db.VarChar(255)
+  type DocumentType @default(image)
+  extension String @db.VarChar(16)
+  url String
+  users user_accounts @relation(fields: [uploaded_by], references: [id])
+  uploaded_by Int
+  uploaded_at DateTime @default(now())
+  edited_at DateTime @default(now())
+  deleted_at DateTime?
+
+  document_tags document_tag_entries[]
+
+  @@index([original_filename])
+}
+
+model articles_tag_entries {
+  id Int @id @default(autoincrement())
+  tag tags @relation(fields: [tag_id], references: [id])
+  tag_id Int
+  article articles @relation(fields: [article_id], references: [id])
+  article_id Int
+}
+
+model document_tag_entries {
+  id Int @id @default(autoincrement())
+  tag tags @relation(fields: [tag_id], references: [id])
+  tag_id Int
+  document documents @relation(fields: [document_id], references: [id])
+  document_id Int
+}
+
+model project_tag_entries {
+  id Int @id @default(autoincrement())
+  tag tags @relation(fields: [tag_id], references: [id])
+  tag_id Int
+  project projects @relation(fields: [project_id], references: [id])
+  project_id Int
+}

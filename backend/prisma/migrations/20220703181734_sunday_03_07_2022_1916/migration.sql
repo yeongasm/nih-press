@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE `articles` ADD COLUMN `hash` INTEGER NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE `projects` ADD COLUMN `hash` INTEGER NOT NULL DEFAULT 0;
