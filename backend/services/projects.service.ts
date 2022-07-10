@@ -7,6 +7,7 @@ export interface ProjectModel {
   id?: number,
   title?: string,
   description?: string,
+  banner_img_url?: string,
   content_url?: string,
   repo_url?: string,
   repo_type?: ProjectRepoType,
@@ -23,6 +24,7 @@ export interface CreateProjectModel {
   title: string,
   description: string,
   tag_id: number,
+  banner_img_url?: string,
   repo_url?: string,
   repo_type?: ProjectRepoType,
   show?: boolean,
@@ -184,6 +186,7 @@ export function getPublic(
         id: true,
         title: true,
         description: true,
+        banner_img_url: true,
         content_url: true,
         repo_url: true,
         repo_type: true,
@@ -202,7 +205,7 @@ export function getPublic(
         }
       },
       take: limit,
-      ...(cursorId != -1 && {
+      ...(cursorId != undefined && {
         skip: 1,
         cursor: { id: cursorId }
       }),
@@ -210,6 +213,37 @@ export function getPublic(
       orderBy: { id: order }
     })
     .then(projects => resolve(projects))
+    .catch(error => reject(error));
+  });
+};
+
+export function getOnePublic(articleId: number): Promise<any> {
+  return new Promise<any>((resolve, reject) => {
+    prisma.projects.findUnique({
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        content_url: true,
+        repo_url: true,
+        repo_type: true,
+        project_tags: {
+          select: {
+            tag: {
+              select: {
+                id: true,
+                key: true,
+                value: true,
+                hidden: true,
+                is_primary_tag: true,
+              }
+            }
+          }
+        }
+      },
+      where: { id: articleId }
+    })
+    .then(articles => resolve(articles))
     .catch(error => reject(error));
   });
 };
@@ -246,6 +280,7 @@ export default {
   get,
   getOne,
   getPublic,
+  getOnePublic,
   deleteProject,
   removeProjectNonPrimaryTags
 };

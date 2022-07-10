@@ -1,7 +1,7 @@
 <template>
   <!-- <router-link :to="props.to" text-gray-400 :class="isCurrentRoute ? 'underline' : 'no-underline'"> -->
-  <router-link :to="props.to" text-gray-400 no-underline>
-    <span class="link link-underline link-underline-black">
+  <router-link :to="props.to" text-gray-400 :class="isCurrentRoute ? 'lg:underline' : 'lg:no-underline'">
+    <span class="link" :class="!isCurrentRoute ? 'link-underline link-underline-black' : ''">
       <slot></slot>
     </span>
   </router-link>
@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 const props = defineProps({ to: String });
-// const isCurrentRoute = computed(() => props.to == useRouter().currentRoute.value.path);
+const isCurrentRoute = computed(() => props.to == useRouter().currentRoute.value.path);
 </script>
 
 <style>

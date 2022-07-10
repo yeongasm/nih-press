@@ -8,8 +8,11 @@ import { storeFile, onlyAllowFilesWithExtension } from '../util/files';
 http.post(
   "project",
   isUserAuthenticated,
+  storeFile.array("file", 1),
+  onlyAllowFilesWithExtension([ 'jpg', 'jpeg', 'png' ]),
   validateRequestSchema(projectSchema.newProject),
   projectController.projectExist({ params: [ [ "title", "title" ] ], throwOnExist: true }),
+  projectController.tryUploadProjectBanner,
   projectController.createNewProject
 );
 
@@ -25,6 +28,17 @@ http.patch(
   projectController.uploadProjectHTML,
   projectController.removeProjectNonPrimaryTags,
   projectController.updateProject
+);
+
+http.patch(
+  "project/banner/:id",
+  isUserAuthenticated,
+  storeFile.array("file", 1),
+  onlyAllowFilesWithExtension([ 'jpg', 'jpeg', 'png', 'gif' ]),
+  projectController.projectExist({ checkId: true }),
+  projectController.tryDeleteExistingProjectBanner,
+  projectController.tryUploadProjectBanner,
+  projectController.updateProjectBannerUrl
 );
 
 http.get(
@@ -43,6 +57,12 @@ http.get(
   "public_projects",
   userController.emailExist(),
   projectController.getPublic
+);
+
+http.get(
+  "public_project/:id",
+  userController.emailExist(),
+  projectController.getOnePublic
 );
 
 http.delete(

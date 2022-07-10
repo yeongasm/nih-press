@@ -174,7 +174,7 @@ const revertValuesAndClosePopup = () => {
   openCreateArticlePopup.value = false;
 };
 
-const enableCreateButton = computed(() => newArticleForm.title.length && newArticleForm.description.length && articlePrimaryTag.key.length && articlePrimaryTag.value.length);
+const enableCreateButton = computed(() => newArticleForm.title.length && newArticleForm.description.length && articlePrimaryTag.key.length && articlePrimaryTag.value.length && !isSubmitting.value);
 
 const createNewArticle = () => {
   if (!isSubmitting.value) {

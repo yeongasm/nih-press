@@ -50,15 +50,15 @@ export function createGroup(req: any, res: Response, next: NextFunction): void {
 };
 
 export function getAllGroupsForUser(req: any, res: Response, next: NextFunction): void {
-  const { limit, cursor, order } = req.query;
+  const { limit, cursorId, order } = req.query;
   const whereClause: GroupModel = {
     created_by: req._passport.user_profile.user_account.id,
     deleted_at: null
   };
   groupsService.getGroups(whereClause, {
-    ...(limit   != undefined && { limit: parseInt(limit) }),
-    ...(cursor  != undefined && { cursor: parseInt(cursor) }),
-    ...(order   != undefined && { order: order }),
+    ...(limit     != undefined && { limit: parseInt(limit) }),
+    ...(cursorId  != undefined && { cursorId: parseInt(cursorId) }),
+    ...(order     != undefined && { order: order }),
   })
   .then(groups => {
     const result = API.ok("Success!");
@@ -69,7 +69,7 @@ export function getAllGroupsForUser(req: any, res: Response, next: NextFunction)
 };
 
 export function getPublicGroups(req: any, res: Response, next: NextFunction): void {
-  const { limit, cursor, order } = req.query;
+  const { limit, cursorId, order } = req.query;
   // NOTE:
   // req.body.user_account.id is set by the previous middleware
   const whereClause: GroupModel = {
@@ -77,9 +77,9 @@ export function getPublicGroups(req: any, res: Response, next: NextFunction): vo
     deleted_at: null
   };
   groupsService.getPublic(whereClause, {
-    ...(limit   != undefined && { limit: parseInt(limit) }),
-    ...(cursor  != undefined && { cursor: parseInt(cursor) }),
-    ...(order   != undefined && { order: order }),
+    ...(limit     != undefined && { limit: parseInt(limit) }),
+    ...(cursorId  != undefined && { cursorId: parseInt(cursorId) }),
+    ...(order     != undefined && { order: order }),
   })
   .then(groups => {
     const result = API.ok("Success!");

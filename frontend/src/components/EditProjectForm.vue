@@ -16,7 +16,7 @@
           Cancel
         </Button>
         <Button
-          bg-green-400 hover:bg-green-300 w-15
+          bg-green-400 hover:bg-green-300 w-15 mr-2
           class="transition"
           font_size="smalltext"
           style="padding: calc(1rem / 2);  border-radius: 0.5rem"
@@ -24,11 +24,32 @@
           :listen_to_enter="true"
           @on-click="tryUpdateProject()"
         >
-          <span v-if="!showSpinner">Save</span>
+          <span v-if="!isSubmitting">Save</span>
           <div v-else class="w-[40px] h-[24px] spinner">
             <EllipsisSpinner background="#fff" :x="8" :y="8" />
           </div>
         </Button>
+        <Button
+          bg-sky-500 hover:bg-sky-300 w-30
+          class="transition"
+          font_size="smalltext"
+          style="padding: calc(1rem / 2);  border-radius: 0.5rem"
+          :enable="enableUploadButton"
+          :listen_to_enter="true"
+          @on-click="tryUploadBanner()"
+        >
+          <span v-if="!isSubmitting">Upload Banner</span>
+          <div v-else class="w-[40px] h-[24px] spinner">
+            <EllipsisSpinner background="#fff" :x="8" :y="8" />
+          </div>
+        </Button>
+      </div>
+      <div relative w-full mb-5>
+        <SubHeading mb-1>Banner Image</SubHeading>
+        <ImageContainer v-if="projectBannerImgUrl" overflow-hidden rounded-lg w-full h-40 :img_url="projectBannerImgUrl" />
+        <div v-else overflow-hidden rounded-lg w-full h-40 bg-slate-300>
+        </div>
+        <ImageUpload absolute bottom-1 right-1 z-10 @on-input="projectBannerImg = $event" @on-delete="projectBannerImg = null" />
       </div>
       <Input title="Title" mb-2 input_style="padding: 1px; padding-left: 1rem; padding-right: 1rem" :default="projectForm.title" @on-input="projectForm.title = $event"/>
       <Input title="Description" mb-2 input_style="padding: 1px; padding-left: 1rem; padding-right: 1rem" :default="projectForm.description" @on-input="projectForm.description = $event"/>
@@ -108,7 +129,7 @@ const project_tags = projectStore.selectedProject.project_tags;
 const primary_tag = project_tags[project_tags.findIndex((tag: any) => tag.tag)];
 listOfTags.value = tagStore.userTags.filter((tag: any) => (tag.key != primary_tag.key && !tag.is_primary_tag));
 
-const showSpinner = ref<boolean>(false);
+const isSubmitting = ref<boolean>(false);
 
 const tinyMceApiKey = computed(() => import.meta.env.VITE_TINY_MCE_API_KEY);
 const additionalTags = ref<number[]>([]);
@@ -118,23 +139,38 @@ for (const projectTags of selectedProject.project_tags) {
     additionalTags.value.push(projectTags.tag.id);
 }
 
-const enableSaveButton = computed(() => projectForm.title.length && projectForm.description.length ? true : false);
+const projectBannerImg = ref(null);
+const projectBannerImgUrl = computed(() => !projectBannerImg.value ? selectedProject.banner_img_url != null ? selectedProject.banner_img_url : "" : URL.createObjectURL(projectBannerImg.value));
+const enableSaveButton = computed(() => (projectForm.title.length && projectForm.description.length && !isSubmitting.value) ? true : false);
+const enableUploadButton = computed(() => (projectBannerImg.value != null && !isSubmitting.value) ? true : false);
 
 const tryUpdateProject = () => {
-  showSpinner.value = true;
-  projectStore.updateProject({
-    ...((projectForm.title.length && projectForm.title != selectedProject.title) && { title: projectForm.title }),
-    ...((projectForm.description.length && projectForm.description != selectedProject.description) && { description: projectForm.description }),
-    ...((projectForm.repoUrl?.length && projectForm.repoUrl != selectedProject.repo_url) && { repo_url: projectForm.repoUrl}),
-    ...((projectForm.repoType.length && projectForm.repoType != selectedProject.repo_type) && { repo_type: projectForm.repoType }),
-    ...((projectForm.visible != selectedProject.show) && { show: projectForm.visible }),
-    ...((projectForm.publish != selectedProject.publish) && { publish: projectForm.publish }),
-    ...((projectForm.content.length && { content: projectForm.content })),
-    ...((additionalTags.value.length && { tag_ids: additionalTags.value }))
-  })
-  .then((result: boolean) => {
-    showSpinner.value = false;
-  });
+  if (!isSubmitting.value) {
+    isSubmitting.value = true;
+    projectStore.updateProject({
+      ...((projectForm.title.length && projectForm.title != selectedProject.title) && { title: projectForm.title }),
+      ...((projectForm.description.length && projectForm.description != selectedProject.description) && { description: projectForm.description }),
+      ...((projectForm.repoUrl?.length && projectForm.repoUrl != selectedProject.repo_url) && { repo_url: projectForm.repoUrl}),
+      ...((projectForm.repoType.length && projectForm.repoType != selectedProject.repo_type) && { repo_type: projectForm.repoType }),
+      ...((projectForm.visible != selectedProject.show) && { show: projectForm.visible }),
+      ...((projectForm.publish != selectedProject.publish) && { publish: projectForm.publish }),
+      ...((projectForm.content.length && { content: projectForm.content })),
+      ...((additionalTags.value.length && { tag_ids: additionalTags.value }))
+    })
+    .then((result: boolean) => {
+      isSubmitting.value = false;
+    });
+  }
+};
+
+const tryUploadBanner = () => {
+  if (!isSubmitting.value && projectBannerImg.value) {
+    isSubmitting.value = true;
+    projectStore.updateProjectBanner(projectBannerImg.value)
+    .then((result: boolean) => {
+      isSubmitting.value = false;
+    });
+  }
 };
 
 </script>

@@ -1,7 +1,5 @@
 <template>
-  <SectionBody>
-    Projects
-  </SectionBody>
+  <ProjectContainer :limit="10" :paginate="true" :show_cards="false"/>
 </template>
 
 <route>

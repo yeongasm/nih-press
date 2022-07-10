@@ -129,16 +129,16 @@ export function update(req: any, res: Response, next: NextFunction): void {
 };
 
 export function getInternal(req: any, res: Response, next: NextFunction): void {
-  const { limit, cursor, order } = req.query;
+  const { limit, cursorId, order } = req.query;
   const whereClause: ArticlesModel = {
     created_by: req._passport.user_profile.id,
     deleted_at: null,
     deleted_by: null
   };
   articlesService.get(whereClause, {
-    ...(limit   != undefined && { limit: parseInt(limit) }),
-    ...(cursor  != undefined && { cursor: parseInt(cursor) }),
-    ...(order   != undefined && { order: order }),
+    ...(limit     != undefined && { limit: parseInt(limit) }),
+    ...(cursorId  != undefined && { cursorId: parseInt(cursorId) }),
+    ...(order     != undefined && { order: order }),
   })
   .then(articles => {
     const result = API.ok("Success!");
@@ -155,15 +155,25 @@ export function getOne(req: any, res: Response, next: NextFunction): void {
    result.attach(articles);
    res.status(result.statusCode()).json(result);
   })
-  .catch(error => next(API.internalServerError("INTERNAL_SERVER_ERROR:FAILED_TO_GET_PROJECT_WITH_ID")));
+  .catch(error => next(API.internalServerError("INTERNAL_SERVER_ERROR:FAILED_TO_GET_ARTICLE_WITH_ID")));
  };
 
+export function getOnePublic(req: any, res: Response, next: NextFunction): void {
+  articlesService.getOnePublic(parseInt(req.params.id))
+  .then(article => {
+    const result = API.ok("Success!");
+    result.attach(article);
+    res.status(result.statusCode()).json(result);
+  })
+  .catch(error => next(API.internalServerError("INTERNAL_SERVER_ERROR:FAILED_TO_GET_ARTICLE_WITH_ID")));
+};
+
 export async function getPublic(req: any, res: Response, next: NextFunction) {
-  const { limit, cursor, order } = req.query;
+  const { limit, cursorId, order } = req.query;
 
   userProfileService.getUserProfile(parseInt(req.body.user_account.id))
-  .then(userProfile => {
-
+  .then(userProfiles => {
+    const userProfile: any = userProfiles[0];
     const whereClause: ArticlesModel = {
       created_by: userProfile.id,
       deleted_at: null,
@@ -173,16 +183,19 @@ export async function getPublic(req: any, res: Response, next: NextFunction) {
     };
 
     articlesService.getPublic(whereClause, {
-      ...(limit   != undefined && { limit: parseInt(limit) }),
-      ...(cursor  != undefined && { cursor: parseInt(cursor) }),
-      ...(order   != undefined && { limit: order }),
+      ...(limit     != undefined && { limit: parseInt(limit) }),
+      ...(cursorId  != undefined && { cursorId: parseInt(cursorId) }),
+      ...(order     != undefined && { order: order }),
     })
     .then(articles => {
       const result = API.ok("Success!");
       result.attach(articles);
       res.status(result.statusCode()).json(result);
     })
-    .catch(err => next(API.internalServerError("INTERNAL_SERVER_ERROR:FAILED_TO_GET_ARTICLES")));
+    .catch(err => {
+      console.log('err > ', err);
+      next(API.internalServerError("INTERNAL_SERVER_ERROR:FAILED_TO_GET_ARTICLES"))
+    });
   });
 };
 

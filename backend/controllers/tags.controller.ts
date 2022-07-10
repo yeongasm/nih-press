@@ -72,7 +72,7 @@ export function update(req: any, res: Response, next: NextFunction): void {
 };
 
 export function getTagsForUser(req: any, res: Response, next: NextFunction): void {
-  const { limit, cursor, order } = req.query;
+  const { limit, cursorId, order } = req.query;
   // NOTE:
   // req.body.user_account.id is set by the previous middleware
   const tagSearchParam : TagModel = {
@@ -81,9 +81,9 @@ export function getTagsForUser(req: any, res: Response, next: NextFunction): voi
     is_primary_tag: false
   };
   tagService.getTag(tagSearchParam, {
-    ...(limit   != undefined && { limit: parseInt(limit) }),
-    ...(cursor  != undefined && { cursor: parseInt(cursor) }),
-    ...(order   != undefined && { order: order }),
+    ...(limit     != undefined && { limit: parseInt(limit) }),
+    ...(cursorId  != undefined && { cursorId: parseInt(cursorId) }),
+    ...(order     != undefined && { order: order }),
   })
   .then(tags => {
     const result = API.ok("Success!");

@@ -5,12 +5,14 @@ import { $assert } from './assert.store';
 
 export const useArticleStore = defineStore('articles', {
   state: () => ({
+    public_articles: [] as any,
     articles: [] as any,
     article: null as any
   }),
   getters: {
     userArticles: (state) => state.articles,
-    selectedArticle: (state) => state.article
+    selectedArticle: (state) => state.article,
+    publicArticles: (state) => state.public_articles
   },
   actions: {
 
@@ -47,6 +49,44 @@ export const useArticleStore = defineStore('articles', {
             "error"
           );
           resolve();
+        });
+      });
+    },
+
+    getArticleWithIdPublic(id: number): Promise<any> {
+      return new Promise<any>((resolve) => {
+        axios.get(apiUrl("public_article") + `/${id}` + queryStringFromObj({ email: import.meta.env.VITE_USER_EMAIL }))
+        .then((response: any) => {
+          resolve(response.data.payload);
+        })
+        .catch((error: any) => resolve(null));
+      });
+    },
+
+    getArticlesPublic({
+      limit = 20,
+      order = 'desc',
+      cursorId
+    }: {
+      limit: number,
+      cursorId: number,
+      order: 'asc' | 'desc'
+    }): Promise<boolean> {
+      return new Promise<boolean>((resolve) => {
+        const queries: any = {
+          limit: limit,
+          order: order,
+          ...(cursorId != undefined && { cursorId: cursorId }),
+          email: import.meta.env.VITE_USER_EMAIL
+        };
+        axios.get(apiUrl("public_articles") + queryStringFromObj(queries))
+        .then((response: any) => {
+          if (response?.data?.payload)
+            this.public_articles = response.data.payload;
+          resolve(true);
+        })
+        .catch((error: any) => {
+          resolve(false);
         })
       });
     },
@@ -156,9 +196,10 @@ export const useArticleStore = defineStore('articles', {
       });
     },
 
-    getArticleContent(): Promise<string> {
+    getArticleContent(article?: any): Promise<string> {
       return new Promise<string>((resolve) => {
-        axios.get(this.selectedArticle.url, {
+        const articleUrl: string = (article != null) ? article.url : this.selectedArticle.url;
+        axios.get(articleUrl, {
           transformRequest: [(data: any, headers: any) => { delete headers.common.Authorization; return data }],
           headers: {
             "Accept": "text/html",

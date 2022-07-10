@@ -2,6 +2,13 @@
   <PopupOverlay v-if="openCreateProjectPopup" @on-exit="revertValuesAndClosePopup()">
     <div p-3 flex flex-col justify-center items-start class="w-[500px]">
       <Title mb-5>Create a Project to showcase</Title>
+      <div relative w-full mb-5>
+        <SubHeading mb-1>Banner Image</SubHeading>
+        <ImageContainer v-if="projectBannerImg != null" overflow-hidden rounded-lg w-full h-40 :img_url="projectBannerImgUrl" />
+        <div v-else overflow-hidden rounded-lg w-full h-40 bg-slate-300>
+        </div>
+        <ImageUpload absolute bottom-1 right-1 z-10 @on-input="projectBannerImg = $event" @on-delete="projectBannerImg = null" />
+      </div>
       <Input w-full mb-2
         title="Title"
         :default="newProjectForm.title"
@@ -148,14 +155,13 @@
 import { useGroupsStore } from '@/store/groups.store';
 import { useTagStore } from '@/store/tags.store';
 import { useProjectStore } from '@/store/projects.store';
-import SubHeading from '../../../components/SubHeading.vue';
 
 const router = useRouter();
 const groupStore = useGroupsStore();
 const tagStore = useTagStore();
 const projectStore = useProjectStore();
 
-(!projectStore.userProjects.length && projectStore.getProjects({}));
+projectStore.getProjects({});
 
 interface NewProjectForm {
   title: string,
@@ -182,6 +188,9 @@ const newProjectForm = reactive<NewProjectForm>({
   repo_type: "none"
 });
 
+const projectBannerImg = ref(null);
+const projectBannerImgUrl = computed(() => !projectBannerImg.value ? "" : URL.createObjectURL(projectBannerImg.value));
+
 groupStore.getGroups().then(() => { projectPrimaryTag.groupId = groupStore.userGroups[0].id; });
 
 const revertValuesAndClosePopup = () => {
@@ -192,7 +201,7 @@ const revertValuesAndClosePopup = () => {
   openCreateProjectPopup.value = false;
 };
 
-const enableCreateButton = computed(() => newProjectForm.title.length && newProjectForm.description.length && projectPrimaryTag.key.length && projectPrimaryTag.value.length);
+const enableCreateButton = computed(() => newProjectForm.title.length && newProjectForm.description.length && projectPrimaryTag.key.length && projectPrimaryTag.value.length && !isSubmitting.value);
 const createNewProject = () => {
   if (!isSubmitting.value) {
     isSubmitting.value = true;
@@ -207,7 +216,8 @@ const createNewProject = () => {
         title: newProjectForm.title,
         description: newProjectForm.description,
         tag_id: tag.id,
-        ...(newProjectForm.repo_url.length && { repo_url: newProjectForm.repo_url, repo_type: newProjectForm.repo_type })
+        ...(newProjectForm.repo_url.length && { repo_url: newProjectForm.repo_url, repo_type: newProjectForm.repo_type }),
+        ...(projectBannerImg.value != null && { bannerImg: projectBannerImg.value })
       })
       .then(() => {
         revertValuesAndClosePopup();

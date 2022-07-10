@@ -41,12 +41,66 @@ export function abortIfNonExistent(req: any, res: Response, next: NextFunction):
   next();
 };
 
+export function tryDeleteExistingProjectBanner(req: any, res: Response, next: NextFunction): void {
+  if (req.files == undefined || !req.files.length)
+    return next();
+
+  const project: any = req.body.__projects__;
+
+  if (!project.banner_img_url?.length)
+    return next();
+
+  const filename: string = (project.banner_img_url.split("/")).pop();
+  const path: string = `${process.env.NODE_ENV}/user_account_id_${req._passport.user_profile.user_account.id}/projects/banners/${filename}`;
+  remove(path)
+  .then(() => next())
+  .catch((error: any) => next(API.badRequest("BAD_REQUEST:REMOVE_BANNER_IMAGE_FAILED")));
+};
+
+export function updateProjectBannerUrl(req: any, res: Response, next: NextFunction): void {
+  const properties: ProjectModel = { banner_img_url: req.body?.__file__?.url };
+
+  projectService.updateProject(properties, parseInt(req.params.id))
+  .then(project => {
+    const result = API.ok("Success!");
+    result.attach(project);
+    res.status(result.statusCode()).json(result);
+  })
+  .catch(err => (API.internalServerError("INTERNAL_SERVER_ERROR:FAILED_TO_STORE_PROJECT_UPDATE")));
+};
+
+export function tryUploadProjectBanner(req: any, res: Response, next: NextFunction): void {
+  // Skip if there are no files present.
+  if (req.files == undefined || !req.files.length)
+    return next();
+
+  const option: FileUploadOption = { dstPath: `${process.env.NODE_ENV}/user_account_id_${req._passport.user_profile.user_account.id}/projects/banners` };
+  const uploads: FileUploadInfo[] = [];
+
+  for (const file of req.files) {
+    const uploadInfo: FileUploadInfo = { file: file, option: option };
+    uploads.push(uploadInfo);
+  };
+
+  upload(uploads)
+  .then(files => {
+    if (!files.length)
+      return next(API.badRequest("BAD_REQUEST:NO_BANNER_IMAGE_HAVE_BEEN_UPLOADED"));
+
+    const file: any = files.shift();
+    req.body.__file__ = file;
+    next();
+  })
+  .catch(err => next(API.badRequest("BAD_REQUEST:IMAGE_UPLOAD_ERROR")));
+};
+
 export function createNewProject(req: any, res: Response, next: NextFunction): void {
 
   const properties: CreateProjectModel = {
     title: req.body.title,
     description: req.body.description,
     tag_id: parseInt(req.body.tag_id),
+    ...(req.body.__file__ != undefined && { banner_img_url: req.body.__file__.url }),
     ...(req.body.repo_url != undefined && { repo_url: req.body.repo_url }),
     ...(req.body.repo_type != undefined && { repo_type: req.body.repo_type }),
     show: true,
@@ -136,14 +190,14 @@ export function updateProject(req: any, res: Response, next: NextFunction): void
 };
 
 export function getInternal(req: any, res: Response, next: NextFunction): void {
-  const { limit, cursor, order } = req.query;
+  const { limit, cursorId, order } = req.query;
   const properties: ProjectModel = {
     owned_by: req._passport.user_profile.user_account.id,
     deleted_at: null
   };
   projectService.get(properties, {
     ...(limit != undefined && { limit: parseInt(limit) }),
-    ...(cursor != undefined && { cursorId: cursor }),
+    ...(cursorId != undefined && { cursorId: cursorId }),
     ...(order != undefined && { order: order })
   })
   .then(projects => {
@@ -164,8 +218,18 @@ export function getOne(req: any, res: Response, next: NextFunction): void {
  .catch(error => next(API.internalServerError("INTERNAL_SERVER_ERROR:FAILED_TO_GET_PROJECT_WITH_ID")));
 };
 
+export function getOnePublic(req: any, res: Response, next: NextFunction): void {
+  projectService.getOnePublic(parseInt(req.params.id))
+  .then(article => {
+    const result = API.ok("Success!");
+    result.attach(article);
+    res.status(result.statusCode()).json(result);
+  })
+  .catch(error => next(API.internalServerError("INTERNAL_SERVER_ERROR:FAILED_TO_GET_ARTICLE_WITH_ID")));
+};
+
 export function getPublic(req: any, res: Response, next: NextFunction): void {
-  const { limit, cursor, order } = req.query;
+  const { limit, cursorId, order } = req.query;
   const properties: ProjectModel = {
     // ...(tag_id != undefined && { tag_id: parseInt(tag_id) }),
     owned_by: req.body.user_account.id,
@@ -174,8 +238,8 @@ export function getPublic(req: any, res: Response, next: NextFunction): void {
     show: true
   };
   projectService.getPublic(properties, {
-    ...(limit != undefined && { limit: limit }),
-    ...(cursor != undefined && { cursorId: cursor }),
+    ...(limit != undefined && { limit: parseInt(limit) }),
+    ...(cursorId != undefined && { cursorId: parseInt(cursorId) }),
     ...(order != undefined && { order: order })
   })
   .then(projects => {

@@ -1,6 +1,6 @@
 <template>
-  <div mb-5 flex flex-row justify-between items-start>
-    <SectionBody class="w-[45%]">
+  <div mb-5 flex flex-col md:grid md:grid-cols-2 md:gap-4>
+    <SectionBody mb-5 md:mb-0>
       <Heading mb-4>Career Overview</Heading>
       <div flex flex-col justify-center items-start relative>
         <div absolute w-8 h-full flex flex-col justify-start items-center>
@@ -28,7 +28,7 @@
         </div>
       </div>
     </SectionBody>
-    <SectionBody class="w-[45%]">
+    <SectionBody>
       <Heading mb-2>Skills</Heading>
       <div flex flex-col justify-center items-start relative>
         <div v-for="skill in skills" flex flex-row justify-start items-center w-full relative>
@@ -53,8 +53,8 @@
       </div>
     </div>
   </SectionBody>
-  <div flex flex-row justify-between items-start mb-5>
-    <SectionBody class="w-[65%]">
+  <div grid grid-rows-2 gap-5 md:flex md:flex-row md:justify-between md:items-start mb-5>
+    <SectionBody class="md:w-[65%]">
       <Heading mb-2>Education</Heading>
       <SubHeading font-bold>Universiti Teknologi PETRONAS</SubHeading>
       <div flex flex-col items-start justify-center>
@@ -62,7 +62,7 @@
         <SmallText>Minor in Business Management</SmallText>
       </div>
     </SectionBody>
-    <SectionBody class="w-[25%]">
+    <SectionBody class="md:w-[25%]">
       <Heading mb-2>Human Languages</Heading>
       <div flex flex-col justify-between items-start>
         <Text>English</Text>
@@ -71,7 +71,7 @@
       </div>
     </SectionBody>
   </div>
-  <Text v-if="resumeUrl.length" mb-5>You can download my full resume <a :href="resumeUrl" text-blue-500 :download="filename" target="_blank">here.</a></Text>
+  <Text v-if="resumeUrl.length" mb-3 text-center xl:text-left xl:mb-0>You can download my full resume <a :href="resumeUrl" text-blue-500 :download="filename" target="_blank">here.</a></Text>
 </template>
 
 <route>

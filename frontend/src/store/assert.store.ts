@@ -31,9 +31,9 @@ export const useAssertStore = defineStore("assert", {
 export const $assert = (msg: string, type: 'success' | 'neutral' | 'warning' | 'error' = 'success') => {
   useAssertStore().$patch((state) => {
     state.assertions.push({ msg: msg, type: type, time: new Date(), id: getRandomInt() });
-    // // We don't need all the assertions, most recent 5 will do.
-    // if (state.assertions.length >= 5) {
-    //   state.assertions.pop();
-    // }
+    // We don't need all the assertions, most recent 5 will do.
+    if (state.assertions.length >= 4) {
+      state.assertions.splice(0, 1);
+    }
   });
 };

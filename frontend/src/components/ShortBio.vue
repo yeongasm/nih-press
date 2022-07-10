@@ -39,13 +39,41 @@
     </div>
   </div>
   <!-- This section is for mobile -->
-  <div xl:hidden>
-
+  <div flex w-full mb-5 xl:hidden>
+    <div bg-white overflow-hidden rounded-lg border border-gray-200 w-full relative h-48>
+      <ImageContainer
+        overflow-hidden rounded-t-lg w-full h-24
+        :img_url="userProfile.profile_banner_url"
+      />
+      <div absolute left-0 right-0 top-0 flex flex-col ml-5>
+        <ImageContainer
+          overflow-hidden rounded-full border border-2 border-white-200 w-24 h-24 mt-12 mb-1
+          :img_url="userProfile.profile_img_url"
+        />
+        <div max-w-24 flex justify-evenly items-center>
+          <a href="https://www.linkedin.com/in/afiqyeong/" target="_blank">
+            <img w-6 h-6 :src="linkedInImgUrl" />
+          </a>
+          <a href="https://github.com/yeongasm" target="_blank">
+            <img w-6 h-6 :src="githubImgUrl" />
+          </a>
+          <a :href="`mailto:${email}`">
+            <img w-6 h-6 :src="emailImgUrl" />
+          </a>
+        </div>
+      </div>
+      <div flex flex-col items-start justify-center ml-33>
+        <Heading>{{ userProfile.display_name }}</Heading>
+        <SmallText>Software Engineer</SmallText>
+        <SmallText>{{ userProfile.location }}</SmallText>
+      </div>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
 import linkedInImgUrl from '@/assets/linkedin.png';
 import githubImgUrl from '@/assets/github.png';
+import emailImgUrl from '@/assets/email.png';
 import copyImgUrl from '@/assets/copy.png';
 import { useUserStore } from '@/store/user.store';
 
@@ -57,7 +85,6 @@ const copyBubble = reactive({
   show: false
 });
 
-
 const emailOnCopy = (e: Event): void => {
   e.preventDefault();
   navigator.clipboard.writeText(userProfile.email);
@@ -67,6 +94,8 @@ const emailOnCopy = (e: Event): void => {
   copyBubble.show = true;
   setTimeout(() => copyBubble.show = false, 1500);
 };
+
+const email = computed(() => import.meta.env.VITE_USER_EMAIL as string)
 
 </script>
 

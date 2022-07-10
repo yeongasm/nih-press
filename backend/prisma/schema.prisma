@@ -74,6 +74,7 @@ model projects {
   id Int @id @default(autoincrement())
   title String @db.VarChar(255)
   description String? @db.VarChar(255)
+  banner_img_url String? @db.VarChar(255)
   content_url String? @db.VarChar(255)
   repo_url String? @db.VarChar(255)
   repo_type ProjectRepoType @default(none)

@@ -1,7 +1,5 @@
 <template>
-  <SectionBody>
-    Articles
-  </SectionBody>
+  <ArticleContainer :limit="10" :paginate="true" layout="tile"/>
 </template>
 
 <route>

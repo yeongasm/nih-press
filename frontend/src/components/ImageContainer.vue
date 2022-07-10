@@ -1,6 +1,6 @@
 <template>
   <div :class="prop.bg">
-    <img max-w-full :class="{ 'w-full h-auto': !prop.vertical, 'h-full w-auto': prop.vertical }" :src="prop.img_url"/>
+    <img max-w-full :class="{ 'w-full h-auto': !prop.vertical, 'h-full w-auto': prop.vertical }" :src="prop.img_url" :alt="prop.img_url" />
   </div>
 </template>
 

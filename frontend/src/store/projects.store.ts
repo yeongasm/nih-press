@@ -6,11 +6,13 @@ import { $assert } from './assert.store';
 export const useProjectStore = defineStore('projects', {
   state: () => ({
     projects: [] as any,
-    project: null as any
+    project: null as any,
+    public_projects: [] as any
   }),
   getters: {
     userProjects: (state) => state.projects,
-    selectedProject: (state) => state.project
+    selectedProject: (state) => state.project,
+    publicProjects: (state) => state.public_projects
   },
   actions: {
 
@@ -51,6 +53,44 @@ export const useProjectStore = defineStore('projects', {
       });
     },
 
+    getProjectWithIdPublic(id: number): Promise<any> {
+      return new Promise<any>((resolve) => {
+        axios.get(apiUrl("public_project") + `/${id}` + queryStringFromObj({ email: import.meta.env.VITE_USER_EMAIL }))
+        .then((response: any) => {
+          resolve(response.data.payload);
+        })
+        .catch((error: any) => resolve(null));
+      });
+    },
+
+    getProjectsPublic({
+      limit = 20,
+      order = 'desc',
+      cursorId
+    }: {
+      limit: number,
+      cursorId: number,
+      order: 'asc' | 'desc'
+    }): Promise<boolean> {
+      return new Promise<boolean>((resolve) => {
+        const queries: any = {
+          limit: limit,
+          order: order,
+          ...(cursorId != undefined && { cursorId: cursorId }),
+          email: import.meta.env.VITE_USER_EMAIL
+        };
+        axios.get(apiUrl("public_projects") + queryStringFromObj(queries))
+        .then((response: any) => {
+          if (response?.data?.payload)
+            this.public_projects = response.data.payload;
+          resolve(true);
+        })
+        .catch((error: any) => {
+          resolve(false);
+        });
+      });
+    },
+
     getProjectWithId(projectId: number): Promise<any> {
       return new Promise<any>((resolve) => {
         axios.get(apiUrl("project") + `/${projectId}`, {
@@ -80,22 +120,28 @@ export const useProjectStore = defineStore('projects', {
       description,
       tag_id,
       repo_url,
-      repo_type
+      repo_type,
+      bannerImg
     }: {
       title: string,
       description: string,
       tag_id: number,
       repo_url?: string,
-      repo_type?: 'none' | 'github' | 'gitlab' | 'bitbucket'
+      repo_type?: 'none' | 'github' | 'gitlab' | 'bitbucket',
+      bannerImg?: File
     }): Promise<boolean> {
       return new Promise<boolean>((resolve) => {
-        axios.post(apiUrl("project"), {
-          title: title,
-          description: description,
-          tag_id: tag_id,
-          ...(repo_url != undefined && { repo_url: repo_url }),
-          ...(repo_type != undefined && { repo_type: repo_type })
-        }, { withCredentials: true })
+        const form = new FormData();
+
+        form.append("title", title);
+        form.append("description", description);
+        form.append("tag_id", `${tag_id}`);
+
+        ((bannerImg != undefined && bannerImg != null) && form.append("file", bannerImg, bannerImg.name));
+        ((repo_url  != undefined && repo_url  != null) && form.append("repo_url", repo_url));
+        ((repo_type != undefined && repo_type != null) && form.append("repo_type", repo_type));
+
+        axios.post(apiUrl("project"), form, { withCredentials: true })
         .then((response: any) => {
           if (response?.data?.payload)
             this.projects.push(response.data.payload);
@@ -162,9 +208,36 @@ export const useProjectStore = defineStore('projects', {
       });
     },
 
-    getProjectContent(): Promise<string> {
+    updateProjectBanner(bannerImg: File): Promise<boolean> {
+      return new Promise<boolean>((resolve) => {
+        const form = new FormData();
+        form.append("file", bannerImg, bannerImg.name);
+        axios.patch(apiUrl("project/banner") + `/${this.selectedProject.id}`, form, { withCredentials: true })
+        .then((response: any) => {
+          if (response?.data?.payload) {
+            this.projects.splice(this.projects.findIndex((project: any) => project.id == this.selectedProject.id), 1, response.data.payload);
+            this.project = response.data.payload;
+          }
+          $assert(`Project with id [ ${this.selectedProject.id} ] banner updated!`);
+          resolve(true);
+        })
+        .catch((error: any) => {
+          $assert(
+            `
+            Failed to create update project's banner with project id [ ${this.selectedProject.id} ].
+            ${error?.response?.data && "Server responded with - " + JSON.stringify(error?.response?.data) }
+            `,
+            "error"
+          );
+          resolve(false);
+        });
+      });
+    },
+
+    getProjectContent(project?: any): Promise<string> {
       return new Promise<string>((resolve) => {
-        axios.get(this.selectedProject.content_url, {
+        const projectUrl: string = (project != null) ? project.content_url : this.selectedProject.content_url;
+        axios.get(projectUrl, {
           transformRequest: [(data: any, headers: any) => { delete headers.common.Authorization; return data }],
           headers: {
             "Accept": "text/html",

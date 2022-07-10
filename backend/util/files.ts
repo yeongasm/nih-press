@@ -72,6 +72,7 @@ export function processImageFile(
 {
   return new Promise((resolve, reject) => {
     const extension: string = getFileExtension(file);
+    sharp.cache(false);
     const sharpInstance = sharp(file.path);
     if (resize) {
       sharpInstance.resize(dimension.width, dimension.height, {

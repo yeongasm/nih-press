@@ -245,6 +245,49 @@ export function getPublic(
   });
 };
 
+export function getOnePublic(articleId: number): Promise<any> {
+  return new Promise<any>((resolve, reject) => {
+    prisma.articles.findUnique({
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        url: true,
+        article_tags: {
+          select: {
+            tag: {
+              select: {
+                id: true,
+                key: true,
+                value: true,
+                hidden: true,
+                is_primary_tag: true,
+              }
+            }
+          }
+        },
+        created_at: true,
+        author: {
+          select: {
+            id: true,
+            display_name: true
+          }
+        },
+        edited_at: true,
+        editor: {
+          select: {
+            id: true,
+            display_name: true
+          }
+        }
+      },
+      where: { id: articleId }
+    })
+    .then(articles => resolve(articles))
+    .catch(error => reject(error));
+  });
+};
+
 export function deleteOne(articleID: number, userAccountId: number): Promise<articles> {
   return new Promise<articles>((resolve, reject) => {
     prisma.articles.update({
@@ -280,6 +323,7 @@ export default {
   get,
   getOne,
   getPublic,
+  getOnePublic,
   deleteOne,
   removeArticleNonPrimaryTags
 };

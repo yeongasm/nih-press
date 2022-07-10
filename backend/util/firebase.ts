@@ -21,7 +21,7 @@ export function uploadFileFromPath(srcPath: string, destination: string = '/'): 
     const filename: string = pathSections[pathSections.length - 1];
 
     const storagePath = path.join(destination, filename);
-    bucket.upload(srcPath, { destination: destination }, (err, file, apiResponse) => {
+    bucket.upload(srcPath, { destination: destination }, (err: any, file: any, apiResponse: any) => {
       if (err)
         reject(err);
       resolve(`https://storage.googleapis.com/${bucket.id}/${storagePath}`);

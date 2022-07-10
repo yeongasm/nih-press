@@ -35,6 +35,23 @@
       </div>
     </div>
   </PopupOverlay>
+  <PopupOverlay v-if="showPreviewPopup" @on-exit="resetPreviewPopupValues()">
+    <ImageContainer
+      overflow-hidden rounded-t-lg class="max-w-[48rem]"
+      :img_url="previewImageUrl"
+    />
+    <div w-full flex items-center justify-center my-4>
+      <Button
+        bg-rose-400 hover:bg-rose-300 w-15
+        class="transition"
+        font_size="smalltext"
+        style="padding: calc(1rem / 2); border-radius: 0.5rem"
+        @on-click="resetPreviewPopupValues()"
+      >
+        Close
+      </Button>
+    </div>
+  </PopupOverlay>
   <SectionBody>
     <Title mb-4>Image(s) for tag &lt;{{ props.tag.key }}&gt; [ id: {{ props.tag.id }} ]</Title>
     <Text mb-4>Shows a list of images that are tied to the current tag. You can also upload images and associate them with the selected tag.</Text>
@@ -53,12 +70,23 @@
     <Table
       v-if="documentStore.imagesWithTag.length"
       :fixed="true"
-      :columns="['id', 'original_filename', 'extension', 'url', 'uploaded_at']"
-      :alias="{ id: 'ID', original_filename: 'Filename', extension: 'Extension', url: 'URL', uploaded_at: 'Uploaded At' }"
+      :columns="['id', 'original_filename', 'extension', 'url', 'uploaded_at', 'preview']"
+      :alias="{ id: 'ID', original_filename: 'Filename', extension: 'Extension', url: 'URL', uploaded_at: 'Uploaded At', preview: 'Preview' }"
       :configuration="{
         uploaded_at: {
           type: 'date',
           format: 'dddd DD/MM/YYYY - HH:mm:ss'
+        },
+        preview: {
+          type: 'button',
+          list: [
+            {
+              display: 'preview',
+              callback: showImagePreviewCb,
+              secondary_color: '#fff',
+              main_color: '#12aaf3'
+            }
+          ]
         }
       }"
       :data="documentStore.imagesWithTag"
@@ -86,6 +114,8 @@ const showSpinner = ref(false);
 
 const input = ref(null);
 const uploadingImage = ref();
+const showPreviewPopup = ref(false);
+const previewImageUrl = ref(null);
 
 const triggerInputClick = () => {
   if (input)
@@ -109,5 +139,15 @@ const tryUploadImage = () => {
     onImagePreviewClose();
   });
 };
+
+const showImagePreviewCb = (image: any) => {
+  showPreviewPopup.value = true;
+  previewImageUrl.value = image.url;
+};
+
+const resetPreviewPopupValues = () => {
+  showPreviewPopup.value = false;
+  previewImageUrl.value = null;
+}
 
 </script>

@@ -46,6 +46,12 @@ http.get(
   articlesController.getPublic
 );
 
+http.get(
+  "public_article/:id",
+  userController.emailExist(),
+  articlesController.getOnePublic
+);
+
 http.delete(
   "article/:id",
   isUserAuthenticated,

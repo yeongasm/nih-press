@@ -1,0 +1,36 @@
+<template>
+  <div flex flex-col md:grid md:grid-cols-3 md:gap-2 mb-3 xl:mb-0>
+    <div v-for="project of userProjects"
+      first-of-type:mt-0 my-4 md:my-0 bg-white rounded-lg border-1 border-gray-200 hover:border-blue-300 cursor-pointer
+      @click="router.push(`/projects/${project.id}`)"
+    >
+      <ImageContainer
+        overflow-hidden rounded-t-lg w-full h-32 max-h-32 mb-5
+        :img_url="project.banner_img_url"
+      />
+      <div p-2>
+        <SubHeading font-bold mb-4>{{ project.title }}</SubHeading>
+        <TagList mb-2 :list="project.project_tags" />
+        <SmallText text-justify>{{ project.description }}</SmallText>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useProjectStore } from '@/store/projects.store';
+const projectStore = useProjectStore();
+const router = useRouter();
+
+interface ArticleContainerProps {
+  limit: number,
+  paginate: boolean,
+  show_cards: boolean
+};
+
+const props = defineProps<ArticleContainerProps>();
+
+(!projectStore.publicProjects.length && await projectStore.getProjectsPublic({ limit: props.limit }));
+const userProjects: any = projectStore.publicProjects;
+
+</script>
