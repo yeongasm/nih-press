@@ -1,0 +1,19 @@
+{
+  "name": "nihpress-build",
+  "version": "1.0.0",
+  "description": "Build script for nihpress",
+  "main": "build.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yeongasm/ygsm-site.git"
+  },
+  "author": "ygsm",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yeongasm/ygsm-site/issues"
+  },
+  "homepage": "https://github.com/yeongasm/ygsm-site#readme"
+}

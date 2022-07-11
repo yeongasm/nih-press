@@ -29,7 +29,7 @@ export default defineConfig({
         'vue',
         'vue-router',
       ],
-      dts: 'src/auto-imports.d.ts'   
+      dts: 'src/auto-imports.d.ts'
     }),
     Pages({
       dirs: [

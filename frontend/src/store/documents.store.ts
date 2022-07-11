@@ -23,10 +23,10 @@ export const useDocumentStore = defineStore('documents', {
       order = 'desc',
       cursorId
     }: {
-      limit: number,
-      cursorId: number,
-      order: 'asc' | 'desc'
-    }): Promise<boolean> {
+      limit?: number,
+      cursorId?: number,
+      order?: 'asc' | 'desc'
+    } = {}): Promise<boolean> {
       return new Promise<boolean>((resolve) => {
         const queries: any = {
           tagId: tagId,

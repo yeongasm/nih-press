@@ -161,7 +161,7 @@ const groupStore = useGroupsStore();
 const tagStore = useTagStore();
 const projectStore = useProjectStore();
 
-projectStore.getProjects({});
+projectStore.getProjects();
 
 interface NewProjectForm {
   title: string,

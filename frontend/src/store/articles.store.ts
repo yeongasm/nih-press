@@ -21,10 +21,10 @@ export const useArticleStore = defineStore('articles', {
       order = 'desc',
       cursorId
     }: {
-      limit: number,
-      cursorId: number,
-      order: 'asc' | 'desc'
-    }): Promise<void> {
+      limit?: number,
+      cursorId?: number,
+      order?: 'asc' | 'desc'
+    } = {}): Promise<void> {
       return new Promise<void>((resolve) => {
         const queries: any = {
           limit: limit,
@@ -68,10 +68,10 @@ export const useArticleStore = defineStore('articles', {
       order = 'desc',
       cursorId
     }: {
-      limit: number,
-      cursorId: number,
-      order: 'asc' | 'desc'
-    }): Promise<boolean> {
+      limit?: number,
+      cursorId?: number,
+      order?: 'asc' | 'desc'
+    } = {}): Promise<boolean> {
       return new Promise<boolean>((resolve) => {
         const queries: any = {
           limit: limit,

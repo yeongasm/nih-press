@@ -22,13 +22,13 @@ import { useProjectStore } from '@/store/projects.store';
 const projectStore = useProjectStore();
 const router = useRouter();
 
-interface ArticleContainerProps {
+interface ProjectContainerProps {
   limit: number,
   paginate: boolean,
   show_cards: boolean
 };
 
-const props = defineProps<ArticleContainerProps>();
+const props = defineProps<ProjectContainerProps>();
 
 (!projectStore.publicProjects.length && await projectStore.getProjectsPublic({ limit: props.limit }));
 const userProjects: any = projectStore.publicProjects;

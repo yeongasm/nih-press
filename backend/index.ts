@@ -51,6 +51,9 @@ app.use(history({
     },
   ],
 })); // history module needs a "rewrites" option to make GET requests work.
+if (process.env.NODE_ENV == "production") {
+  app.use(express.static(path.join(__WORKING_DIR__, "/dist/")))
+}
 app.use(passport.initialize());
 
 import api, { errorHandler } from './routes/api';

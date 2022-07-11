@@ -75,14 +75,14 @@ const updateProfile = async () => {
   const imgUrl: any[] = [];
 
   const upload = async (file: File | null, dst: string): Promise<string> => {
-    let result: string = "";
+    let result: string | boolean = "";
     if (file != null) {
-      result = await userStore.uploadDocument(file, dst);
+      result = await userStore.uploadDocument(file, dst as ("profile" | "banner" | "resume"));
       if (!result) {
         return new Promise<string>(resolve => resolve(""));
       }
     }
-    return new Promise<string>(resolve => resolve(result));
+    return new Promise<string>(resolve => resolve(result as string));
   };
 
   // Try upload banner image.
@@ -97,7 +97,7 @@ const updateProfile = async () => {
     profileUrl.length && imgUrl.push([ "profile_img_url", profileUrl ]);
   }
 
-  let update: IUpdateUserProfile = {
+  let update: any = {
     ...((profile.display_name != userStore.userProfile.display_name) && { display_name: profile.display_name}),
     ...((profile.location != userStore.userProfile.location) && { location: profile.location }),
     profile_banner_url: undefined,
@@ -106,7 +106,7 @@ const updateProfile = async () => {
 
   imgUrl.forEach(uploads => update[uploads[0]] = uploads[1]);
 
-  userStore.updateUserProfile(update)
+  userStore.updateUserProfile(update as IUpdateUserProfile)
   .finally(() => {
     setTimeout(() => showSpinner.value = 0, 1000)
     profile = reactive({ ...userStore.userProfile });
