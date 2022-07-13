@@ -20,7 +20,7 @@ http.get(
 
 http.get(
   "public_groups",
-  userController.emailExist(),
+  userController.emailExist({ continueIfNonExistent: false }),
   groupController.getPublicGroups
 )
 

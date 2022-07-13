@@ -42,13 +42,13 @@ http.get(
 
 http.get(
   "public_articles",
-  userController.emailExist(),
+  userController.emailExist({ continueIfNonExistent: false }),
   articlesController.getPublic
 );
 
 http.get(
   "public_article/:id",
-  userController.emailExist(),
+  userController.emailExist({ continueIfNonExistent: false }),
   articlesController.getOnePublic
 );
 

@@ -28,7 +28,7 @@
       <div>
         <Title>Projects</Title>
         <Text mb-4>Have a look around at what I've done in my spare time.</Text>
-        <ProjectContainer :limit="5" :paginate="false" :show_cards="true" />
+        <ProjectContainer :limit="5" :paginate="false" :is_home_screen="true" />
       </div>
     </div>
   </SectionBody>

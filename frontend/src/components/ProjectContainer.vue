@@ -6,9 +6,9 @@
 import ProjectList from '@/components/ProjectList.vue';
 
 interface ProjectContainerProps {
-  limit: number,
+  limit?: number,
   paginate: boolean,
-  show_cards: boolean
+  is_home_screen: boolean
 };
 
 const props = defineProps<ProjectContainerProps>();

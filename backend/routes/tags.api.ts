@@ -22,7 +22,7 @@ http.get(
 
 http.get(
   "public_tags",
-  userController.emailExist(),
+  userController.emailExist({ continueIfNonExistent: false }),
   tagsController.getTagsForUser
 );
 

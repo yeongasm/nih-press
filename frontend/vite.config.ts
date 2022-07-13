@@ -33,8 +33,7 @@ export default defineConfig({
     }),
     Pages({
       dirs: [
-        { dir: "src/pages", baseRoute: "" },
-        { dir: "src/pages/dashboard", baseRoute: "dashboard" }
+        { dir: "src/pages", baseRoute: "" }
       ]
     }),
     Components(),

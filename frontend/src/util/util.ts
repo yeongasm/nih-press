@@ -14,11 +14,9 @@ export const queryStringFromObj: Function = (obj: any): string => {
 
 export const apiUrl: Function = (route: string): string => {
   let urlPath = route;
-  if (import.meta.env.VITE_ENV == "development") {
-    if (route.charAt(0) == "/" || route.charAt(0) == "\\")
-      route = route.slice(1);
-    urlPath = import.meta.env.VITE_ROOT_API_URL + route;
-  }
+  if (route.charAt(0) == "/" || route.charAt(0) == "\\")
+    route = route.slice(1);
+  urlPath = import.meta.env.VITE_ROOT_API_URL + route;
   return urlPath;
 };
 

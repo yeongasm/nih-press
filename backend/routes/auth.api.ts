@@ -7,7 +7,7 @@ import { isUserAuthenticated } from '../auth/auth.impl';
 http.post(
   "login",
   validateRequestSchema(authSchema.login),
-  userControoler.emailExist(),
+  userControoler.emailExist({ continueIfNonExistent: false }),
   authController.passwordValid,
   authController.login
   // authController.requestJwt

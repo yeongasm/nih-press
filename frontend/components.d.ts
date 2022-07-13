@@ -46,6 +46,7 @@ declare module 'vue' {
     UpdateUserProfile: typeof import('./src/components/UpdateUserProfile.vue')['default']
     VariadicTextSize: typeof import('./src/components/VariadicTextSize.vue')['default']
     WorkHistory: typeof import('./src/components/WorkHistory.vue')['default']
+    WowSuchEmpty: typeof import('./src/components/WowSuchEmpty.vue')['default']
   }
 }
 

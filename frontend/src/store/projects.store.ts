@@ -7,12 +7,14 @@ export const useProjectStore = defineStore('projects', {
   state: () => ({
     projects: [] as any,
     project: null as any,
-    public_projects: [] as any
+    public_projects: [] as any,
+    home_screen_project_list: [] as any
   }),
   getters: {
     userProjects: (state) => state.projects,
     selectedProject: (state) => state.project,
-    publicProjects: (state) => state.public_projects
+    publicProjects: (state) => state.public_projects,
+    homseScreenProjects: (state) => state.home_screen_project_list
   },
   actions: {
 
@@ -81,8 +83,14 @@ export const useProjectStore = defineStore('projects', {
         };
         axios.get(apiUrl("public_projects") + queryStringFromObj(queries))
         .then((response: any) => {
-          if (response?.data?.payload)
+          if (response?.data?.payload) {
             this.public_projects = response.data.payload;
+
+            // Optimization:
+            // When the website first loads, we fill this array with projects that will be used for previewing.
+            (!this.home_screen_project_list.length && (this.home_screen_project_list = this.public_projects));
+          }
+
           resolve(true);
         })
         .catch((error: any) => {
@@ -240,9 +248,7 @@ export const useProjectStore = defineStore('projects', {
         axios.get(projectUrl, {
           transformRequest: [(data: any, headers: any) => { delete headers.common.Authorization; return data }],
           headers: {
-            "Accept": "text/html",
-            // "Access-Control-Request-Headers": "Content-Type",
-            // "Access-Control-Request-Method": "GET"
+            "Accept": "text/html"
           }
         })
         .then((response: any) => {
