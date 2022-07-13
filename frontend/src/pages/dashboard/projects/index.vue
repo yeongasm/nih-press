@@ -70,7 +70,7 @@
           @on-click="createNewProject()"
         >
           <span v-if="!isSubmitting">Create</span>
-          <div v-else class="w-[40px] h-[24px] spinner">
+          <div v-else class="w-[40px] h-[24px]">
             <EllipsisSpinner background="#fff" :x="8" :y="8" />
           </div>
         </Button>
@@ -161,7 +161,7 @@ const groupStore = useGroupsStore();
 const tagStore = useTagStore();
 const projectStore = useProjectStore();
 
-projectStore.getProjects({});
+projectStore.getProjects();
 
 interface NewProjectForm {
   title: string,

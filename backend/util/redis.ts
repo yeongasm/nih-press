@@ -1,5 +1,5 @@
 import { createClient } from 'redis';
-const redisClient = createClient();
+const redisClient = createClient({ ...(process.env.REDISCLOUD_URL != undefined && { url: process.env.REDISCLOUD_URL }) });
 redisClient.on("error", console.error);
 redisClient.connect();
 

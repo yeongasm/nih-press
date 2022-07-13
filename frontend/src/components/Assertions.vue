@@ -10,7 +10,7 @@
       Remove All
     </Button>
     <transition-group name="list" tag="div">
-      <AssertCard my-1 v-for="assert in assertStore.asserts" :key="assert" :msg="assert.msg" :type="assert.type" :time="assert.time" :id="assert.id" @on-remove="removeAssert" />
+      <AssertCard my-1 v-for="assert in assertStore.asserts" :msg="assert.msg" :type="assert.type" :time="assert.time" :id="assert.id" @on-remove="removeAssert" />
     </transition-group>
   </div>
 </template>

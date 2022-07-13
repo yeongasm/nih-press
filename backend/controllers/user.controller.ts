@@ -6,22 +6,28 @@ import userProfileService from '../services/userProfile.service';
 import { genPasswordHash } from '../auth/auth.impl';
 import { upload, type FileUploadOption, type FileUploadInfo } from '../util/files';
 
-export function emailExist(throwOnExist: boolean = false): Function {
+export function emailExist({ throwOnExist = false, continueIfNonExistent = true }: { throwOnExist?: boolean, continueIfNonExistent?: boolean } = {}): Function {
   return (req: Request, res: Response, next: NextFunction): void => {
     const param: UserAccountModel = { email: req.body.email || req.query.email };
     userAccountService.getUserWith(param)
-      .then((userAccount) => {
-        if (throwOnExist && userAccount)
+      .then((userAccounts) => {
+        if (throwOnExist && userAccounts.length)
           return next(API.conflict("EMAIL_EXIST"))
 
-        if (!throwOnExist && !userAccount)
+        if (!continueIfNonExistent && !userAccounts.length)
           return next(API.unprocessableEntity("EMAIL_NON_EXISTENT"));
 
+        if (continueIfNonExistent && !userAccounts.length)
+          return next();
+
         // attach to request body so that we don't have to query the db in the next middleware.
-        req.body.user_account = userAccount;
+        req.body.user_account = userAccounts[0];
         next();
       })
-      .catch(() => next(API.internalServerError("INTERNAL_SERVER_ERROR:FETCH_USER_FAILED:EMAIL")));
+      .catch((err) => {
+        console.log('err > ', err);
+        next(API.internalServerError("INTERNAL_SERVER_ERROR:FETCH_USER_FAILED:EMAIL"))
+      });
   };
 };
 
@@ -30,8 +36,8 @@ export function usernameExist(req: Request, res: Response, next: NextFunction): 
     username: req.body.username
   };
   userAccountService.getUserWith(param)
-  .then((userAccount) => {
-    if (userAccount)
+  .then((userAccounts) => {
+    if (userAccounts.length)
       return next(API.conflict("USERNAME_EXIST"));
     next();
   })
@@ -67,8 +73,8 @@ export function idExist(req: Request, res: Response, next: NextFunction) : void 
     id: parseInt(req.params.id)
   };
   userAccountService.getUserWith(user)
-    .then((userAccount) => {
-      if (!userAccount)
+    .then((userAccounts) => {
+      if (!userAccounts.length)
         return next(API.notFound("USER_NON_EXISTENT"));
       next();
     })

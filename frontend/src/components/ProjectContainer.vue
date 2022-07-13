@@ -5,12 +5,12 @@
 <script setup lang="ts">
 import ProjectList from '@/components/ProjectList.vue';
 
-interface ArticleContainerProps {
-  limit: number,
+interface ProjectContainerProps {
+  limit?: number,
   paginate: boolean,
-  show_cards: boolean
+  is_home_screen: boolean
 };
 
-const props = defineProps<ArticleContainerProps>();
+const props = defineProps<ProjectContainerProps>();
 
 </script>

@@ -29,12 +29,11 @@ export default defineConfig({
         'vue',
         'vue-router',
       ],
-      dts: 'src/auto-imports.d.ts'   
+      dts: 'src/auto-imports.d.ts'
     }),
     Pages({
       dirs: [
-        { dir: "src/pages", baseRoute: "" },
-        { dir: "src/pages/dashboard", baseRoute: "dashboard" }
+        { dir: "src/pages", baseRoute: "" }
       ]
     }),
     Components(),

@@ -31,6 +31,22 @@
 
 <script setup lang="ts">
 import ShortBio from '@/components/ShortBio.vue';
+import { useProjectStore } from '@/store/projects.store';
+import { useArticleStore } from '@/store/articles.store';
+import { useUserStore } from '@/store/user.store';
+
+const projectStore = useProjectStore();
+const articleStore = useArticleStore();
+const userStore = useUserStore();
+
+// NOTE:
+// Pre fetch the data so that the Project / Article container does not need to fetch it again.
+onMounted(() => {
+  (!projectStore.publicProjects.length && projectStore.getProjectsPublic({ limit: 10 }));
+  (!articleStore.publicArticles.length && articleStore.getArticlesPublic({ limit: 10 }));
+  (userStore.userProfile == null && userStore.getUserProfile());
+});
+
 const currentRoute = computed(() => {
   const subPaths = useRouter().currentRoute.value.path.split('/');
   return "/" + subPaths[1];
@@ -46,7 +62,7 @@ const websiteVersion = computed(() => import.meta.env.VITE_WEBSITE_VER);
 
 <style>
 .app-container {
-  width: 60%;
+  width: 80%;
 }
 
 .center-container {

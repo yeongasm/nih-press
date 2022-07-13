@@ -1,5 +1,5 @@
 <template>
-  <ProjectContainer :limit="10" :paginate="true" :show_cards="false"/>
+  <ProjectContainer :paginate="true" :is_home_screen="false" />
 </template>
 
 <route>

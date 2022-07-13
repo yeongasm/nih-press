@@ -10,6 +10,10 @@ import { __WORKING_DIR__ } from './util/paths';
 import './util/firebase';
 
 const app: Express = express();
+// Make a temp dir if directory does not exist. Special use case for Heroku.
+if (!fs.existsSync("temp")) {
+  fs.mkdirSync("temp");
+}
 
 // Theoratically, we should not have crashes due to accessing undefined variables from an object since we're using TypeScript.
 
@@ -34,8 +38,8 @@ app.use(cors({
     // allow requests with no origin
     // (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      var msg = `The CORS policy for this site does not allow access from ${origin}`;
+    if (process.env.NODE_ENV == "developmment" && allowedOrigins.indexOf(origin) === -1) {
+      let msg = `The CORS policy for this site does not allow access from ${origin}`;
       return callback(new Error(msg), false);
     }
     return callback(null, true);
@@ -51,6 +55,9 @@ app.use(history({
     },
   ],
 })); // history module needs a "rewrites" option to make GET requests work.
+if (process.env.NODE_ENV == "production") {
+  app.use(express.static(path.join(__WORKING_DIR__, "/dist/")))
+}
 app.use(passport.initialize());
 
 import api, { errorHandler } from './routes/api';

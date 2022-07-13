@@ -2,7 +2,7 @@ import path from 'path';
 
 export const __WORKING_DIR__: string = (process.env.NODE_ENV == "development")
   ? path.join(__dirname, "..")
-  : path.join(__dirname, "..", "..");
+  : path.join(__dirname, ".."); // NOTE: Temporary fix until we figure out the structure of the project.
 
 export const KEY_PATH = path.join(__WORKING_DIR__, "keys");
 export const PUBLIC_KEY_PATH: string    = path.join(KEY_PATH, process.env.PUBLIC_KEY_NAME || "");

@@ -6,7 +6,7 @@
 import ArticleList from '@/components/ArticleList.vue';
 
 interface ArticleContainerProps {
-  limit: number,
+  limit?: number,
   paginate: boolean,
   layout: 'list' | 'card' | 'tile'
 };

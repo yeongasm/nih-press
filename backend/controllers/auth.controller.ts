@@ -60,12 +60,12 @@ export function requestJwt(req: any, res: Response, next: NextFunction): void {
   // NOTE:
   // req.body.user_account_id is attached by isSessionStillValid().
   userAccountService.getUserWith({ id: req.body.user_account_id })
-  .then(user => {
-    if (!user)
+  .then(users => {
+    if (!users.length)
       return next(API.notFound("NOT_FOUND:COULD_NOT_REQUEST_ACCESS_FOR_NON_EXISTENT_ACCOUNT"));
 
     const token: string = parseCookies(req).__session_token;
-    const jwt: JwtObject = issueJwt(user, token);
+    const jwt: JwtObject = issueJwt(users[0], token);
     const payload = API.ok("ACCESS_TOKEN_OK");
     payload.attach(jwt);
     res.status(payload.statusCode()).json(payload);

@@ -9,7 +9,7 @@ http.post(
   "project",
   isUserAuthenticated,
   storeFile.array("file", 1),
-  onlyAllowFilesWithExtension([ 'jpg', 'jpeg', 'png' ]),
+  onlyAllowFilesWithExtension([ 'jpg', 'jpeg', 'png', 'gif' ]),
   validateRequestSchema(projectSchema.newProject),
   projectController.projectExist({ params: [ [ "title", "title" ] ], throwOnExist: true }),
   projectController.tryUploadProjectBanner,
@@ -55,13 +55,13 @@ http.get(
 
 http.get(
   "public_projects",
-  userController.emailExist(),
+  userController.emailExist({ continueIfNonExistent: false }),
   projectController.getPublic
 );
 
 http.get(
   "public_project/:id",
-  userController.emailExist(),
+  userController.emailExist({ continueIfNonExistent: false }),
   projectController.getOnePublic
 );
 

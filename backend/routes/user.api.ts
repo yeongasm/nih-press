@@ -13,7 +13,7 @@ if (process.env.NODE_ENV == "development") {
   http.post(
     "user",
     validateRequestSchema(userSchema.createUser),
-    userController.emailExist(true),
+    userController.emailExist({ throwOnExist: true }),
     userController.usernameExist,
     userController.create
   );
@@ -42,7 +42,7 @@ http.get(
 
 http.get(
   "public_user_profile",
-  userController.emailExist(),
+  userController.emailExist({ continueIfNonExistent: false }),
   userProfileController.getPublicAccessUserProfile
 );
 

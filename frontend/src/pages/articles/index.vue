@@ -1,5 +1,5 @@
 <template>
-  <ArticleContainer :limit="10" :paginate="true" layout="tile"/>
+  <ArticleContainer :paginate="true" layout="tile"/>
 </template>
 
 <route>

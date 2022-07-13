@@ -15,9 +15,9 @@ export interface CreateUserAccount {
   password: string
 };
 
-export function getUserWith(properties: UserAccountModel): Promise<user_accounts | null> {
-  return new Promise<user_accounts | null>((resolve, reject) => {
-    prisma.user_accounts.findUnique({
+export function getUserWith(properties: UserAccountModel): Promise<user_accounts[]> {
+  return new Promise<user_accounts[]>((resolve, reject) => {
+    prisma.user_accounts.findMany({
       where: properties
     })
     .then(res => resolve(res))

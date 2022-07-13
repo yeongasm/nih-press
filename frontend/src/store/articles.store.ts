@@ -6,13 +6,15 @@ import { $assert } from './assert.store';
 export const useArticleStore = defineStore('articles', {
   state: () => ({
     public_articles: [] as any,
+    home_screen_public_articles: [] as any,
     articles: [] as any,
     article: null as any
   }),
   getters: {
     userArticles: (state) => state.articles,
     selectedArticle: (state) => state.article,
-    publicArticles: (state) => state.public_articles
+    publicArticles: (state) => state.public_articles,
+    homeScreenPublicArticles: (state) => state.home_screen_public_articles
   },
   actions: {
 
@@ -21,10 +23,10 @@ export const useArticleStore = defineStore('articles', {
       order = 'desc',
       cursorId
     }: {
-      limit: number,
-      cursorId: number,
-      order: 'asc' | 'desc'
-    }): Promise<void> {
+      limit?: number,
+      cursorId?: number,
+      order?: 'asc' | 'desc'
+    } = {}): Promise<void> {
       return new Promise<void>((resolve) => {
         const queries: any = {
           limit: limit,
@@ -68,10 +70,10 @@ export const useArticleStore = defineStore('articles', {
       order = 'desc',
       cursorId
     }: {
-      limit: number,
-      cursorId: number,
-      order: 'asc' | 'desc'
-    }): Promise<boolean> {
+      limit?: number,
+      cursorId?: number,
+      order?: 'asc' | 'desc'
+    } = {}): Promise<boolean> {
       return new Promise<boolean>((resolve) => {
         const queries: any = {
           limit: limit,
@@ -81,8 +83,13 @@ export const useArticleStore = defineStore('articles', {
         };
         axios.get(apiUrl("public_articles") + queryStringFromObj(queries))
         .then((response: any) => {
-          if (response?.data?.payload)
+          if (response?.data?.payload) {
             this.public_articles = response.data.payload;
+
+            // Optimization:
+            // When the website first loads, we fill this array with projects that will be used for previewing.
+            (!this.home_screen_public_articles.length && (this.home_screen_public_articles = this.public_articles));
+          }
           resolve(true);
         })
         .catch((error: any) => {
