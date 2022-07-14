@@ -18,7 +18,7 @@
     <Footer/>
   </div>
   <!-- Mobile view -->
-  <div flex flex-col justify--start items-start xl:hidden p-2>
+  <div flex flex-col justify--start items-start p-2 xl:hidden>
     <NavigationBar />
     <SuspenseWrapper :component="ShortBio" v-if="showShortBioAndTitle"/>
     <div overflow-y-auto w-full mb-15>

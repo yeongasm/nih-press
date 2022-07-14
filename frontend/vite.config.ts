@@ -44,5 +44,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src')
     }
   },
-  envDir: './'
+  envDir: './',
+  server: {
+    proxy: {
+      "/api": "http://localhost:5000"
+    }
+  }
 })
