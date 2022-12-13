@@ -9,8 +9,7 @@
         I am a software engineer currently part the foundation team at The Creative Assembly. In pursuit of knowledge, I constantly meddle in uncharted territories beyond my skill set. Some areas that I have dwelled in over the past couple of years include desktop application development, low level graphics APIs (i.e OpenGL & Vulkan), web development and much more!
         <br/><br/>
         This site aims to be a space where I showcase my projects and share my knowledge. Feel free to take a look around and enjoy your stay. Disclaimer, opinions expressed are solely my own.
-        <br/><br/>
-        <b>NOTE:</b> I don't have time (read lazy) to implement a "search" feature for the article section. You'll have to bookmark them instead 😊.
+        <!-- <b>NOTE:</b> I don't have time (read lazy) to implement a "search" feature for the article section. You'll have to bookmark them instead 😊. -->
       </Text>
     </div>
   </SectionBody>
