@@ -37,7 +37,7 @@ for (const key in commandLineArguments) {
 }
 if (!commandLineArguments.skipbuild) {
     //Build backend.
-    execSync("cd backend && tsc && cp -a dist/. ../release && cp -a keys/. ../release/keys && cp -a prisma/migrations/. ../release/prisma/migrations && cp prisma/schema.prisma ../release/prisma");
+    execSync("cd backend && npm run build && cp -a dist/. ../release && cp -a keys/. ../release/keys && cp -a prisma/migrations/. ../release/prisma/migrations && cp prisma/schema.prisma ../release/prisma");
     // Create package.json based on backend's.
     const package = JSON.parse(fs.readFileSync("backend/package.json"));
     
