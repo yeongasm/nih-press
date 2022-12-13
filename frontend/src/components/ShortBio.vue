@@ -1,7 +1,7 @@
 <template>
   <!-- This section is for desktop -->
-  <div v-if="userProfile != undefined || userProfile != null">
-    <div hidden xl:flex w-full>
+  <div hidden xl:flex w-full>
+    <div v-if="userProfile != undefined || userProfile != null">
       <div bg-white overflow-hidden rounded-lg border border-gray-200 w-full relative>
         <ImageContainer
           overflow-hidden rounded-t-lg w-full h-30 mb-20
@@ -39,8 +39,10 @@
         </div>
       </div>
     </div>
-    <!-- This section is for mobile -->
-    <div flex w-full mb-5 xl:hidden>
+  </div>
+  <!-- This section is for mobile -->
+  <div flex w-full mb-5 xl:hidden>
+    <div v-if="userProfile != undefined || userProfile != null">
       <div bg-white overflow-hidden rounded-lg border border-gray-200 w-full relative h-48>
         <ImageContainer
           overflow-hidden rounded-t-lg w-full h-24

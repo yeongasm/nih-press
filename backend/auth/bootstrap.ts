@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import fs from 'fs';
-import { PUBLIC_KEY_PATH, PRIVATE_KEY_PATH } from './paths';
+import { PUBLIC_KEY_PATH, PRIVATE_KEY_PATH } from '../util/paths';
 
 function bootstrap() {
 
