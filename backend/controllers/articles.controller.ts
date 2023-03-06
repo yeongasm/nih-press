@@ -159,7 +159,7 @@ export function getOne(req: any, res: Response, next: NextFunction): void {
  };
 
 export function getOnePublic(req: any, res: Response, next: NextFunction): void {
-  articlesService.getOnePublic(parseInt(req.params.id))
+  articlesService.getOnePublic(decodeURI(req.params.title))
   .then(article => {
     const result = API.ok("Success!");
     result.attach(article);

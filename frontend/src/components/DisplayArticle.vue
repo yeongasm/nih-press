@@ -18,7 +18,9 @@ import { useArticleStore } from '@/store/articles.store';
 const articleStore = useArticleStore();
 const route = useRoute();
 
-const { id } = route.params;
-const article = await articleStore.getArticleWithIdPublic(parseInt(id as string));
+const { title } = route.params;
+console.log('title > ', title);
+console.log('route.params > ', route.params);
+const article = await articleStore.getArticleWithTitlePublic(decodeURI(title as string));
 const content = await articleStore.getArticleContent(article);
 </script>

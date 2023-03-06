@@ -7,7 +7,7 @@
       </div>
       <div relative>
         <router-view />
-        <Assertions fixed bottom-0 right-0 mb-15 mr-15 />
+        <!-- <Assertions fixed bottom-0 right-0 mb-15 mr-15 /> -->
       </div>
     </div>
   </div>

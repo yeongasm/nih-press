@@ -15,7 +15,7 @@ import { useProjectStore } from '@/store/projects.store';
 const projectStore = useProjectStore();
 const route = useRoute();
 
-const { id } = route.params;
-const project = await projectStore.getProjectWithIdPublic(parseInt(id as string));
+const { title } = route.params;
+const project = await projectStore.getProjectWithTitlePublic(decodeURI(title as string));
 const content = await projectStore.getProjectContent(project);
 </script>

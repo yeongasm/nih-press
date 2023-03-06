@@ -55,9 +55,9 @@ export const useProjectStore = defineStore('projects', {
       });
     },
 
-    getProjectWithIdPublic(id: number): Promise<any> {
+    getProjectWithTitlePublic(title: string): Promise<any> {
       return new Promise<any>((resolve) => {
-        axios.get(apiUrl("public_project") + `/${id}` + queryStringFromObj({ email: import.meta.env.VITE_USER_EMAIL }))
+        axios.get(apiUrl("public_project") + `/${encodeURI(title)}` + queryStringFromObj({ email: import.meta.env.VITE_USER_EMAIL }))
         .then((response: any) => {
           resolve(response.data.payload);
         })

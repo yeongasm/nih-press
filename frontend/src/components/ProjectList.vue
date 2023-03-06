@@ -2,7 +2,7 @@
   <div flex flex-col md:grid md:grid-cols-3 md:gap-2 mb-3 xl:mb-0 v-if="userProjects.length">
     <div v-for="project of userProjects"
       first-of-type:mt-0 my-4 md:my-0 bg-white rounded-lg border-1 border-gray-200 hover:border-blue-300 cursor-pointer
-      @click="router.push(`/projects/${project.id}`)"
+      @click="router.push(`/projects/${encodeURI(project.title)}`)"
     >
       <ImageContainer
         overflow-hidden rounded-t-lg w-full h-32 max-h-32 mb-5

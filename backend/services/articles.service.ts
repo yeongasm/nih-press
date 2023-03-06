@@ -245,9 +245,9 @@ export function getPublic(
   });
 };
 
-export function getOnePublic(articleId: number): Promise<any> {
+export function getOnePublic(title: string): Promise<any> {
   return new Promise<any>((resolve, reject) => {
-    prisma.articles.findUnique({
+    prisma.articles.findFirst({
       select: {
         id: true,
         title: true,
@@ -281,7 +281,7 @@ export function getOnePublic(articleId: number): Promise<any> {
           }
         }
       },
-      where: { id: articleId }
+      where: { title: title }
     })
     .then(articles => resolve(articles))
     .catch(error => reject(error));

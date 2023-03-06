@@ -55,9 +55,9 @@ export const useArticleStore = defineStore('articles', {
       });
     },
 
-    getArticleWithIdPublic(id: number): Promise<any> {
+    getArticleWithTitlePublic(title: string): Promise<any> {
       return new Promise<any>((resolve) => {
-        axios.get(apiUrl("public_article") + `/${id}` + queryStringFromObj({ email: import.meta.env.VITE_USER_EMAIL }))
+        axios.get(apiUrl("public_article") + `/${encodeURI(title)}` + queryStringFromObj({ email: import.meta.env.VITE_USER_EMAIL }))
         .then((response: any) => {
           resolve(response.data.payload);
         })
