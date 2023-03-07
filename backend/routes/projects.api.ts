@@ -60,7 +60,7 @@ http.get(
 );
 
 http.get(
-  "public_project/:title",
+  "public_project/:tag",
   userController.emailExist({ continueIfNonExistent: false }),
   projectController.getOnePublic
 );

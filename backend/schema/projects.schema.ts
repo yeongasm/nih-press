@@ -4,6 +4,9 @@ const newProject = joi.object({
   title: joi.string()
     .max(255)
     .required(),
+  tag: joi.string()
+    .max(255)
+    .required(),
   description: joi.string()
     .max(255)
     .required(),
@@ -16,6 +19,8 @@ const newProject = joi.object({
 
 const updateProject = joi.object({
   title: joi.string()
+    .max(255),
+  tag: joi.string()
     .max(255),
   description: joi.string()
     .max(255),

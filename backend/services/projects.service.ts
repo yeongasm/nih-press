@@ -5,6 +5,7 @@ export type ProjectRepoType = 'none' | 'github' | 'gitlab' | 'bitbucket';
 
 export interface ProjectModel {
   id?: number,
+  tag?: string,
   title?: string,
   description?: string,
   banner_img_url?: string,
@@ -22,6 +23,7 @@ export interface ProjectModel {
 
 export interface CreateProjectModel {
   title: string,
+  tag: string,
   description: string,
   tag_id: number,
   banner_img_url?: string,
@@ -184,6 +186,7 @@ export function getPublic(
     prisma.projects.findMany({
       select: {
         id: true,
+        tag: true,
         title: true,
         description: true,
         banner_img_url: true,
@@ -217,11 +220,12 @@ export function getPublic(
   });
 };
 
-export function getOnePublic(title: string): Promise<any> {
+export function getOnePublic(tag: string): Promise<any> {
   return new Promise<any>((resolve, reject) => {
     prisma.projects.findFirst({
       select: {
         id: true,
+        tag: true,
         title: true,
         description: true,
         content_url: true,
@@ -241,7 +245,7 @@ export function getOnePublic(title: string): Promise<any> {
           }
         }
       },
-      where: { title: title }
+      where: { tag: tag, show: true, publish: true }
     })
     .then(articles => resolve(articles))
     .catch(error => reject(error));

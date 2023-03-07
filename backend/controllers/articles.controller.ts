@@ -92,6 +92,7 @@ export function create(req: any, res: Response, next: NextFunction): void {
 
   const params: CreateArticleModel = {
     title: req.body.title,
+    tag: req.body.tag,
     description: req.body.description,
     publish: false,
     show: true,
@@ -159,7 +160,7 @@ export function getOne(req: any, res: Response, next: NextFunction): void {
  };
 
 export function getOnePublic(req: any, res: Response, next: NextFunction): void {
-  articlesService.getOnePublic(decodeURI(req.params.title))
+  articlesService.getOnePublic(decodeURI(req.params.tag))
   .then(article => {
     const result = API.ok("Success!");
     result.attach(article);

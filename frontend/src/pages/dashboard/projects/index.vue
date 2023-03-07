@@ -16,6 +16,12 @@
         input_style="padding: 1px; padding-left: 1rem; padding-right: 1rem"
       />
       <Input w-full mb-2
+        title="Tag"
+        :default="newProjectForm.tag"
+        @on-input="newProjectForm.tag = $event"
+        input_style="padding: 1px; padding-left: 1rem; padding-right: 1rem"
+      />
+      <Input w-full mb-2
         title="Description"
         :default="newProjectForm.description"
         @on-input="newProjectForm.description = $event"
@@ -165,6 +171,7 @@ projectStore.getProjects();
 
 interface NewProjectForm {
   title: string,
+  tag: string,
   description: string,
   repo_url: string,
   repo_type: 'none' | 'github' | 'gitlab' | 'bitbucket'
@@ -183,6 +190,7 @@ const projectPrimaryTag = reactive({
 
 const newProjectForm = reactive<NewProjectForm>({
   title: "",
+  tag: "",
   description: "",
   repo_url: "",
   repo_type: "none"
@@ -214,6 +222,7 @@ const createNewProject = () => {
     }).then((tag: any) => {
       projectStore.newProject({
         title: newProjectForm.title,
+        tag: newProjectForm.tag,
         description: newProjectForm.description,
         tag_id: tag.id,
         ...(newProjectForm.repo_url.length && { repo_url: newProjectForm.repo_url, repo_type: newProjectForm.repo_type }),

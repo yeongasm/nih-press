@@ -98,6 +98,7 @@ export function createNewProject(req: any, res: Response, next: NextFunction): v
 
   const properties: CreateProjectModel = {
     title: req.body.title,
+    tag: req.body.tag,
     description: req.body.description,
     tag_id: parseInt(req.body.tag_id),
     ...(req.body.__file__ != undefined && { banner_img_url: req.body.__file__.url }),
@@ -219,7 +220,7 @@ export function getOne(req: any, res: Response, next: NextFunction): void {
 };
 
 export function getOnePublic(req: any, res: Response, next: NextFunction): void {
-  projectService.getOnePublic(decodeURI(req.params.title))
+  projectService.getOnePublic(decodeURI(req.params.tag))
   .then(article => {
     const result = API.ok("Success!");
     result.attach(article);

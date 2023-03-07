@@ -55,9 +55,9 @@ export const useProjectStore = defineStore('projects', {
       });
     },
 
-    getProjectWithTitlePublic(title: string): Promise<any> {
+    getProjectWithTagPublic(tag: string): Promise<any> {
       return new Promise<any>((resolve) => {
-        axios.get(apiUrl("public_project") + `/${encodeURI(title)}` + queryStringFromObj({ email: import.meta.env.VITE_USER_EMAIL }))
+        axios.get(apiUrl("public_project") + `/${tag}` + queryStringFromObj({ email: import.meta.env.VITE_USER_EMAIL }))
         .then((response: any) => {
           resolve(response.data.payload);
         })
@@ -125,6 +125,7 @@ export const useProjectStore = defineStore('projects', {
 
     newProject({
       title,
+      tag,
       description,
       tag_id,
       repo_url,
@@ -132,6 +133,7 @@ export const useProjectStore = defineStore('projects', {
       bannerImg
     }: {
       title: string,
+      tag: string,
       description: string,
       tag_id: number,
       repo_url?: string,
@@ -142,6 +144,7 @@ export const useProjectStore = defineStore('projects', {
         const form = new FormData();
 
         form.append("title", title);
+        form.append("tag", tag);
         form.append("description", description);
         form.append("tag_id", `${tag_id}`);
 

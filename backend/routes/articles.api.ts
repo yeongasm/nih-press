@@ -47,7 +47,7 @@ http.get(
 );
 
 http.get(
-  "public_article/:title",
+  "public_article/:tag",
   userController.emailExist({ continueIfNonExistent: false }),
   articlesController.getOnePublic
 );

@@ -94,7 +94,7 @@ const careers = reactive([
     company_name: "Creative Assembly",
     from: "Feb 2022",
     to: "Present",
-    description: "Working on foundation libraries while porting our previously Steam exclusive titles to the Microsoft Store and Epic Games Store.",
+    description: "Successfully delivered back catalog titles to other store fronts helping the company fulfill a multi-million dollar contract. Maintainer of foundation libraries that is used across all teams.",
     hover_class: "hover-ocean"
   },
   {

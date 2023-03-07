@@ -55,9 +55,9 @@ export const useArticleStore = defineStore('articles', {
       });
     },
 
-    getArticleWithTitlePublic(title: string): Promise<any> {
+    getArticleWithTagPublic(tag: string): Promise<any> {
       return new Promise<any>((resolve) => {
-        axios.get(apiUrl("public_article") + `/${encodeURI(title)}` + queryStringFromObj({ email: import.meta.env.VITE_USER_EMAIL }))
+        axios.get(apiUrl("public_article") + `/${tag}` + queryStringFromObj({ email: import.meta.env.VITE_USER_EMAIL }))
         .then((response: any) => {
           resolve(response.data.payload);
         })
@@ -124,16 +124,19 @@ export const useArticleStore = defineStore('articles', {
 
     newArticle({
       title,
+      tag,
       description,
       tag_id
     }: {
       title: string,
+      tag: string,
       description: string,
       tag_id: number
     }): Promise<boolean> {
       return new Promise<boolean>((resolve) => {
         axios.post(apiUrl("article"), {
           title: title,
+          tag: tag,
           description: description,
           tag_id: tag_id
         }, { withCredentials: true })

@@ -42,6 +42,7 @@ model user_profile {
 
 model articles {
   id Int @id @default(autoincrement())
+  tag String @db.VarChar(255) @default("")
   title String @db.VarChar(255)
   description String? @db.VarChar(255)
   url String? @db.VarChar(255)
@@ -60,7 +61,7 @@ model articles {
 
   article_tags articles_tag_entries[]
 
-  @@index([title, created_at])
+  @@index([tag, title, created_at])
 }
 
 enum ProjectRepoType {
@@ -72,6 +73,7 @@ enum ProjectRepoType {
 
 model projects {
   id Int @id @default(autoincrement())
+  tag String @db.VarChar(255) @default("")
   title String @db.VarChar(255)
   description String? @db.VarChar(255)
   banner_img_url String? @db.VarChar(255)
@@ -89,7 +91,7 @@ model projects {
 
   project_tags project_tag_entries[]
 
-  @@index([title])
+  @@index([tag, title])
 }
 
 model tags {

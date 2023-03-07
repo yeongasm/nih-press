@@ -3,6 +3,7 @@ import prisma from '../prisma/db';
 
 export interface ArticlesModel {
   id?: number,
+  tag?: string,
   title?: string,
   description?: string,
   url?: string,
@@ -19,6 +20,7 @@ export interface ArticlesModel {
 
 export interface CreateArticleModel {
   title: string,
+  tag: string,
   description: string,
   show: boolean,
   publish: boolean
@@ -206,6 +208,7 @@ export function getPublic(
       }),
       select: {
         id: true,
+        tag: true,
         title: true,
         description: true,
         url: true,
@@ -245,11 +248,12 @@ export function getPublic(
   });
 };
 
-export function getOnePublic(title: string): Promise<any> {
+export function getOnePublic(tag: string): Promise<any> {
   return new Promise<any>((resolve, reject) => {
     prisma.articles.findFirst({
       select: {
         id: true,
+        tag: true,
         title: true,
         description: true,
         url: true,
@@ -281,7 +285,7 @@ export function getOnePublic(title: string): Promise<any> {
           }
         }
       },
-      where: { title: title }
+      where: { tag: tag, show: true, publish: true }
     })
     .then(articles => resolve(articles))
     .catch(error => reject(error));

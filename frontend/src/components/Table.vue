@@ -15,7 +15,7 @@
             text-center text-xs
           >
             <span v-if="props.configuration[column]">
-              <span v-if="props.configuration[column].type == 'date'" text-gray-400>{{ formatDateAs(row[column].value, props.configuration[column].format) }}</span>
+              <span v-if="props.configuration[column].type == 'date'" text-gray-400>{{ formatDateAs(row[column], props.configuration[column].format) }}</span>
               <div v-else-if="props.configuration[column].type == 'button'">
                 <div v-for="button in props.configuration[column].list" @click="button.callback(row)">
                   <div

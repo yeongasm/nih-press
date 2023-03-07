@@ -9,6 +9,12 @@
         input_style="padding: 1px; padding-left: 1rem; padding-right: 1rem"
       />
       <Input w-full mb-2
+        title="Tag"
+        :default="newArticleForm.tag"
+        @on-input="newArticleForm.tag = $event"
+        input_style="padding: 1px; padding-left: 1rem; padding-right: 1rem"
+      />
+      <Input w-full mb-2
         title="Description"
         :default="newArticleForm.description"
         @on-input="newArticleForm.description = $event"
@@ -146,6 +152,7 @@ const articleStore = useArticleStore();
 
 interface NewArticleForm {
   title: string,
+  tag: string,
   description: string
 };
 
@@ -163,6 +170,7 @@ const articlePrimaryTag = reactive({
 
 const newArticleForm = reactive<NewArticleForm>({
   title: "",
+  tag: "",
   description: ""
 });
 
@@ -188,6 +196,7 @@ const createNewArticle = () => {
     }).then((tag: any) => {
       articleStore.newArticle({
         title: newArticleForm.title,
+        tag: newArticleForm.tag,
         description: newArticleForm.description,
         tag_id: tag.id
       })

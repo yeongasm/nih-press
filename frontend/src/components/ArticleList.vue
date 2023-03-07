@@ -4,7 +4,7 @@
       <div v-for="article of userArticles"
         bg-white rounded-lg border-1 border-gray-200 hover:border-blue-300 p-2 cursor-pointer flex flex-col justify-start items-start
         class="transition"
-        @click="router.push(`/articles/${encodeURI(article.title)}`)"
+        @click="router.push(`/articles/${article.tag}`)"
       >
         <SubHeading font-bold mb-4>{{ article.title }}</SubHeading>
         <TagList mb-2 :list="article.article_tags" />
@@ -18,7 +18,7 @@
     <div v-else>
       <div v-if="props.layout == 'list'">
         <div v-for="article of userArticles"
-          @click="router.push(`/articles/${encodeURI(article.title)}`)"
+          @click="router.push(`/articles/${article.tag}`)"
           py-4 cursor-pointer
           class="article-section"
         >
@@ -31,7 +31,7 @@
         </div>
       </div>
       <div flex flex-col w-full mb-3 xl:mb-0 v-else>
-        <SectionBody v-for="article of userArticles" @click="router.push(`/articles/${encodeURI(article.title)}`)" first-of-type:mt-0 my-4 md:my-0 cursor-pointer hover:border-blue-300 mb-3>
+        <SectionBody v-for="article of userArticles" @click="router.push(`/articles/${article.tag}`)" first-of-type:mt-0 my-4 md:my-0 cursor-pointer hover:border-blue-300 mb-3>
           <Title mb-5>{{ article.title }}</Title>
           <TagList mb-2 :list="article.article_tags" />
           <div mb-2>

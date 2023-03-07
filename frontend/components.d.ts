@@ -4,6 +4,7 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
+    404Content: typeof import('./src/components/404Content.vue')['default']
     ArticleContainer: typeof import('./src/components/ArticleContainer.vue')['default']
     ArticleList: typeof import('./src/components/ArticleList.vue')['default']
     AssertCard: typeof import('./src/components/AssertCard.vue')['default']
@@ -28,6 +29,7 @@ declare module 'vue' {
     ImageUpload: typeof import('./src/components/ImageUpload.vue')['default']
     Input: typeof import('./src/components/Input.vue')['default']
     NavigationBar: typeof import('./src/components/NavigationBar.vue')['default']
+    NoContent: typeof import('./src/components/NoContent.vue')['default']
     PersonIcon: typeof import('./src/components/PersonIcon.vue')['default']
     PopupOverlay: typeof import('./src/components/PopupOverlay.vue')['default']
     ProjectContainer: typeof import('./src/components/ProjectContainer.vue')['default']

@@ -3,6 +3,9 @@ import joi from 'joi';
 const createArticle = joi.object({
   title: joi.string()
     .required(),
+  tag: joi.string()
+    .max(255)
+    .required(),
   description: joi.string()
     .required(),
   tag_id: joi.number()
@@ -11,6 +14,8 @@ const createArticle = joi.object({
 
 const updateArticle = joi.object({
   title: joi.string(),
+  tag: joi.string()
+    .max(255),
   description: joi.string(),
   show: joi.boolean(),
   publish: joi.boolean(),

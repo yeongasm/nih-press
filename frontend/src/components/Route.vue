@@ -9,7 +9,10 @@
 
 <script setup lang="ts">
 const props = defineProps({ to: String });
-const isCurrentRoute = computed(() => props.to == useRouter().currentRoute.value.path);
+const isCurrentRoute = computed(() => {
+  const pathStr: string[] = useRouter().currentRoute.value.path.split('/');
+  return props.to == `/${pathStr[1]}`;
+});
 </script>
 
 <style>
