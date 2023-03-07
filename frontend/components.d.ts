@@ -4,7 +4,6 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
-    404Content: typeof import('./src/components/404Content.vue')['default']
     ArticleContainer: typeof import('./src/components/ArticleContainer.vue')['default']
     ArticleList: typeof import('./src/components/ArticleList.vue')['default']
     AssertCard: typeof import('./src/components/AssertCard.vue')['default']
